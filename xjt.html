@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>时间数据表格</title>
+    <style>
+      table {
+        border-collapse: collapse;
+        width: 100%;
+      }
+
+      th,
+      td {
+        border: 1px solid #dddddd;
+        text-align: left;
+        padding: 8px;
+      }
+
+      th {
+        background-color: #f2f2f2;
+      }
+
+      .idle-time {
+        background-color: lightgreen;
+      }
+    </style>
+  </head>
+  <body>
+    <table>
+      <thead>
+        <tr>
+          <th>类型</th>
+          <th>路径</th>
+          <th>出发时间</th>
+          <th>到达时间</th>
+          <th>历时</th>
+        </tr>
+      </thead>
+      <tbody id="tableBody">
+        <!-- 表格内容将在此动态生成 -->
+      </tbody>
+    </table>
+    <script type="text/javascript" src="./xjt.js"></script>
+    <script>
+      const data = result
+
+      const tableBody = document.getElementById('tableBody')
+
+      // 填充数据到表格中
+      result.forEach((item) => {
+        const row = document.createElement('tr')
+        // 判断是否为公交车空闲时间或高铁空闲时间，若是，则添加 idle-time 类
+        if (item.type === 'bus' || item.type === 'railway') {
+          row.classList.add('idle-time')
+        }
+        row.innerHTML = `
+            <td>${item.type}</td>
+            <td>${item.path}</td>
+            <td>${item.go}</td>
+            <td>${item.arrive}</td>
+            <td>${item.past}</td>
+        `
+        tableBody.appendChild(row)
+      })
+    </script>
+  </body>
+</html>

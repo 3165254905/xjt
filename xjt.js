@@ -1,14 +1,4 @@
-const path = [
-  '越新公寓',
-  '景泰嘉苑',
-  '绍兴北站公交站',
-  '绍兴北火车站',
-  '温州南火车站',
-  '火车南站公交枢纽',
-  '吾邻路口',
-  'Meaning Space意空间',
-]
-const way = [
+const ways = [
   { type: 'foot', from: '越新公寓', to: '景泰嘉苑', m: '10' },
   {
     type: 'bus',
@@ -51,181 +41,396 @@ const way = [
     from: '吾邻路口',
     to: 'Meaning Space意空间',
     m: 5,
+    eat: true,
   },
+  { type: 'main', name: '温州·【瓯越偶像日Vol06】CrossingX意次元·Idol Live', start: '13:00', end: '17:00', eat: true },
+  {
+    type: 'foot',
+    to: '吾邻路口',
+    from: 'Meaning Space意空间',
+    m: 5,
+  },
+  {
+    type: 'bus',
+    to: '火车南站公交枢纽',
+    from: '吾邻路口',
+    m: 25,
+    beizhu: 35,
+    start: [
+      '17:41',
+      '17:47',
+      '17:52',
+      '17:58',
+      '18:04',
+      '18:09',
+      '18:15',
+      '18:19',
+      '18:24',
+      '18:34',
+      '18:42',
+      '18:47',
+      '18:51',
+      '18:56',
+      '19:02',
+    ],
+  },
+  {
+    type: 'foot',
+    to: '温州南火车站',
+    from: '火车南站公交枢纽',
+    m: 5,
+  },
+  {
+    type: 'railway',
+    to: '绍兴北火车站',
+    from: '温州南火车站',
+    way: [
+      { start: '20:14', end: '22:28' },
+      { start: '19:47', end: '21:59' },
+      { start: '18:56', end: '21:35' },
+      { start: '18:34', end: '21:12' },
+      { start: '19:28', end: '21:03' },
+    ],
+  },
+  { type: 'foot', to: '绍兴北站公交站', from: '绍兴北火车站', m: '20' },
+  {
+    type: 'bus',
+    to: '鲁迅高级中学东门',
+    from: '绍兴北站公交站',
+    m: '45',
+    start: ['20:15', '20:35', '21:05', '21:35', '22:05', '22:35'],
+  },
+  { type: 'foot', to: '越新公寓', from: '鲁迅高级中学东门', m: '25', mustbeentime: '23:00' },
 ]
+
+// console.log(ways1)
+
+// const way = [
+//   { type: 'foot', from: '越新公寓', to: '景泰嘉苑', m: '10' },
+//   {
+//     type: 'bus',
+//     from: '景泰嘉苑',
+//     to: '绍兴北站公交站',
+//     m: '50',
+//     start: ['6:50', '7:15', '7:35', '7:55', '8:25', '8:45'],
+//   },
+//   { type: 'foot', from: '绍兴北站公交站', to: '绍兴北火车站', m: '10' },
+//   {
+//     type: 'railway',
+//     from: '绍兴北火车站',
+//     to: '温州南火车站',
+//     way: [
+//       { start: '6:52', end: '9:52' },
+//       { start: '7:41', end: '9:59' },
+//       { start: '7:51', end: '10:33' },
+//       { start: '8:00', end: '10:58' },
+//       { start: '8:10', end: '10:44' },
+//       { start: '8:28', end: '11:05' },
+//       { start: '8:42', end: '11:29' },
+//       { start: '8:58', end: '11:48' },
+//     ],
+//   },
+//   {
+//     type: 'foot',
+//     from: '温州南火车站',
+//     to: '火车南站公交枢纽',
+//     m: 20,
+//   },
+//   {
+//     type: 'bus',
+//     from: '火车南站公交枢纽',
+//     to: '吾邻路口',
+//     m: 25,
+//     start: ['11:02', '11:07', '11:14', '11:20', '11:26', '11:31', '11:37', '11:44', '11:50', '11:56', '12:04'],
+//   },
+//   {
+//     type: 'foot',
+//     from: '吾邻路口',
+//     to: 'Meaning Space意空间',
+//     m: 5,
+//   },
+// ]
 const startTime = '13:00'
 const endTime = '17:00'
 const festivalName = '温州·【瓯越偶像日Vol06】CrossingX意次元·Idol Live'
 const result = []
+const paths = []
+const updatedPaths = []
 let time
 timeInit()
-let haslunch = false
-let shouldlunch = false
-for (let i = way.length - 1; i >= 0; i--) {
-  if (haslunch === true) {
-    haslunch = '吃过啦'
-    const arrive = time
-    time = subtractMinutesFromTime(time, 40)
-    const go = time
-    result.push({ path: `吃饭`, go, arrive, past: calculateTimeDifferenceAsString(go, arrive) })
-  }
-  if (way[i].type === 'foot') {
-    const arrive = time
-    time = subtractMinutesFromTime(time, way[i].m)
-    const go = time
-    result.push({ path: `${way[i].from}-${way[i].to}`, go, arrive, past: calculateTimeDifferenceAsString(go, arrive) })
-  }
-  if (way[i].type === 'bus') {
-    const lastTime = time
-    time = subtractMinutesFromTime(time, way[i].m)
-    const go = findMaxTimeBeforeEndTime(way[i].start, time)
-    time = go
-    const arrive = subtractMinutesFromTime(go, -way[i].m)
-    result.push({
-      path: `公交车空闲时间`,
-      go: arrive,
-      arrive: lastTime,
-      past: calculateTimeDifferenceAsString(arrive, lastTime),
-    })
-    result.push({ path: `${way[i].from}-${way[i].to}`, go, arrive, past: calculateTimeDifferenceAsString(go, arrive) })
-  }
-  if (way[i].type === 'railway') {
-    const go = findLatestEndTimeBeforeGivenTime(way[i].way, time)
-    const index = findLatestEndTimeIndexBeforeGivenTime(way[i].way, time)
-    const arrive = way[i].way[index].end
-    time = subtractMinutesFromTime(go, 15)
-    result.push({ path: `${way[i].from}-${way[i].to}`, go, arrive, past: calculateTimeDifferenceAsString(go, arrive) })
-  }
-  if (haslunch !== '吃过啦' && isTimeBeforeSpecificTime(time, '10:00')) {
-    haslunch = true
-    shouldlunch = true
-    i = way.length
-    result.length = 0
-    timeInit()
-  }
-}
-// 对数组按时间排序
-result.sort((a, b) => {
-  // 提取出发时间的小时和分钟
-  const [aHours, aMinutes] = a.go.split(':').map(Number)
-  const [bHours, bMinutes] = b.go.split(':').map(Number)
-
-  // 按小时排序
-  if (aHours !== bHours) {
-    return aHours - bHours
+function render() {
+  const ways1 = []
+  let temp = []
+  paths.length = 0
+  for (const item of ways) {
+    if (item.type === 'main') {
+      if (temp.length > 0) {
+        ways1.push(temp)
+        temp = []
+      }
+      ways1.push([item])
+    } else if (item.mustbeentime) {
+      temp.push(item)
+      ways1.push(temp)
+      temp = []
+    } else {
+      temp.push(item)
+    }
   }
 
-  // 如果小时相同，按分钟排序
-  return aMinutes - bMinutes
-})
-console.log(result)
-result.length = 0
-const go = subtractMinutesFromTime(time, 40)
-result.push({
-  type: 'getup',
-  path: `起床准备`,
-  go,
-  arrive: time,
-  past: calculateTimeDifferenceAsString(go, time),
-})
-for (let i = 0; i < way.length; i++) {
-  if (way[i].type === 'foot') {
-    const go = time
-    time = subtractMinutesFromTime(time, -way[i].m)
-    const arrive = time
-    result.push({
-      type: 'foot',
-      path: `${way[i].from}-${way[i].to}`,
-      go,
-      arrive,
-      past: calculateTimeDifferenceAsString(go, arrive),
-    })
+  if (temp.length > 0) {
+    ways1.push(temp)
   }
-  if (way[i].type === 'bus') {
-    const go = subtractMinutesFromTime(findMinTimeAfterStartTime(way[i].start, time), 0)
-    const arrive = subtractMinutesFromTime(go, -way[i].m)
-    if (isTimeBeforeSpecificTime(time, go))
+  result.length = 0
+  for (let j = 0; j < ways1.length; j++) {
+    let haslunch = false
+    let shouldlunch = false
+    const way = ways1[j]
+    const lastItem = way[way.length - 1]
+    const hasMustBeEntime = lastItem && lastItem.mustbeentime !== undefined
+    if (way[0].type === 'main') {
       result.push({
-        type: 'wait',
-        path: `等公交车`,
+        type: 'foot',
+        path: `入场`,
         go: time,
-        arrive: go,
-        past: calculateTimeDifferenceAsString(time, go),
+        arrive: startTime,
+        past: calculateTimeDifferenceAsString(time, startTime),
       })
-    time = arrive
-    result.push({
-      type: 'bus',
-      path: `${way[i].from}-${way[i].to}`,
-      go,
-      arrive,
-      past: calculateTimeDifferenceAsString(go, arrive),
-    })
-  }
-  if (way[i].type === 'railway') {
-    const startList = way[i].way.map((it) => it.start)
-    const lastTime = time
-    time = subtractMinutesFromTime(time, -15)
-    result.push({
-      type: 'wait',
-      path: `防止错过高铁`,
-      go: lastTime,
-      arrive: time,
-      past: calculateTimeDifferenceAsString(lastTime, time),
-    })
-    const arrive = subtractMinutesFromTime(findEarliestStartTimeAfterGivenTime(way[i].way, time), 0)
-    const index = findEarliestStartTimeIndexAfterGivenTime(way[i].way, time)
-    const go = way[i].way[index].start
-    if (isTimeBeforeSpecificTime(time, arrive))
       result.push({
-        type: 'wait',
-        path: `等高铁`,
-        go: time,
-        arrive: go,
-        past: calculateTimeDifferenceAsString(time, go),
+        type: 'main',
+        path: festivalName,
+        go: startTime,
+        arrive: endTime,
+        past: calculateTimeDifferenceAsString(startTime, endTime),
       })
-    time = arrive
-    result.push({
-      type: 'railway',
-      path: `${way[i].from}-${way[i].to}`,
-      go,
-      arrive,
-      past: calculateTimeDifferenceAsString(go, arrive),
+      time = endTime
+      if (way[0].eat === true) {
+        shouldlunch = false
+        const go = time
+        time = subtractMinutesFromTime(time, -40)
+        const arrive = time
+        result.push({
+          type: 'eat',
+          path: `吃饭`,
+          go,
+          arrive,
+          past: calculateTimeDifferenceAsString(go, arrive),
+        })
+      }
+      paths.push(...result)
+      result.length = 0
+      continue
+    }
+    if (hasMustBeEntime) time = lastItem.mustbeentime
+    for (let i = way.length - 1; i >= 0; i--) {
+      if (haslunch === true) {
+        haslunch = '吃过啦'
+        const arrive = time
+        time = subtractMinutesFromTime(time, 40)
+        const go = time
+        result.push({ path: `吃饭`, go, arrive, past: calculateTimeDifferenceAsString(go, arrive) })
+      }
+      if (way[i].type === 'foot') {
+        const arrive = time
+        time = subtractMinutesFromTime(time, way[i].m)
+        const go = time
+        result.push({
+          path: `${way[i].from}-${way[i].to}`,
+          go,
+          arrive,
+          past: calculateTimeDifferenceAsString(go, arrive),
+        })
+      }
+      if (way[i].type === 'bus') {
+        const lastTime = time
+        time = subtractMinutesFromTime(time, way[i].m)
+        const go = findMaxTimeBeforeEndTime(way[i].start, time)
+        time = go
+        const arrive = subtractMinutesFromTime(go, -way[i].m)
+        result.push({
+          path: `公交车空闲时间`,
+          go: arrive,
+          arrive: lastTime,
+          past: calculateTimeDifferenceAsString(arrive, lastTime),
+        })
+        result.push({
+          path: `${way[i].from}-${way[i].to}`,
+          go,
+          arrive,
+          past: calculateTimeDifferenceAsString(go, arrive),
+        })
+      }
+      if (way[i].type === 'railway') {
+        const go = findLatestEndTimeBeforeGivenTime(way[i].way, time)
+        const index = findLatestEndTimeIndexBeforeGivenTime(way[i].way, time)
+        const arrive = way[i].way[index].end
+        time = subtractMinutesFromTime(go, 15)
+        result.push({
+          path: `${way[i].from}-${way[i].to}`,
+          go,
+          arrive,
+          past: calculateTimeDifferenceAsString(go, arrive),
+        })
+      }
+      if (way[i].eat === true && haslunch !== '吃过啦') {
+        haslunch = true
+        shouldlunch = true
+        i = way.length
+        result.length = 0
+        timeInit()
+      }
+    }
+    // 对数组按时间排序
+    result.sort((a, b) => {
+      // 提取出发时间的小时和分钟
+      const [aHours, aMinutes] = a.go.split(':').map(Number)
+      const [bHours, bMinutes] = b.go.split(':').map(Number)
+
+      // 按小时排序
+      if (aHours !== bHours) {
+        return aHours - bHours
+      }
+
+      // 如果小时相同，按分钟排序
+      return aMinutes - bMinutes
     })
-  }
-  if (haslunch !== '吃过啦' && isTimeBeforeSpecificTime(time, '10:00')) {
-    haslunch = true
-    i = way.length
     result.length = 0
-    timeInit()
+    if (j == 0) {
+      const go = subtractMinutesFromTime(time, 40)
+      result.push({
+        type: 'getup',
+        path: `起床准备`,
+        go,
+        arrive: time,
+        past: calculateTimeDifferenceAsString(go, time),
+      })
+    }
+
+    if (shouldlunch && isTimeBeforeSpecificTime('12:00', time)) {
+      shouldlunch = false
+      const go = time
+      time = subtractMinutesFromTime(time, -40)
+      const arrive = time
+      result.push({
+        type: 'eat',
+        path: `吃饭`,
+        go,
+        arrive,
+        past: calculateTimeDifferenceAsString(go, arrive),
+      })
+    }
+    for (let i = 0; i < way.length; i++) {
+      // console.log(i, way.length)
+      if (way[i].type === 'foot') {
+        const go = time
+        time = subtractMinutesFromTime(time, -way[i].m)
+        const arrive = time
+        result.push({
+          type: 'foot',
+          path: `${way[i].from}-${way[i].to}`,
+          go,
+          arrive,
+          past: calculateTimeDifferenceAsString(go, arrive),
+        })
+      }
+      if (way[i].type === 'bus') {
+        const go = subtractMinutesFromTime(findMinTimeAfterStartTime(way[i].start, time), 0)
+        const arrive = subtractMinutesFromTime(go, -way[i].m)
+        if (isTimeBeforeSpecificTime(time, go))
+          result.push({
+            type: 'wait',
+            path: `等公交车`,
+            go: time,
+            arrive: go,
+            past: calculateTimeDifferenceAsString(time, go),
+          })
+        time = arrive
+        result.push({
+          type: 'bus',
+          path: `${way[i].from}-${way[i].to}`,
+          go,
+          arrive,
+          past: calculateTimeDifferenceAsString(go, arrive),
+        })
+      }
+      if (way[i].type === 'railway') {
+        const startList = way[i].way.map((it) => it.start)
+        const lastTime = time
+        time = subtractMinutesFromTime(time, -15)
+        result.push({
+          type: 'wait',
+          path: `防止错过高铁`,
+          go: lastTime,
+          arrive: time,
+          past: calculateTimeDifferenceAsString(lastTime, time),
+        })
+        const arrive = subtractMinutesFromTime(findEarliestStartTimeAfterGivenTime(way[i].way, time), 0)
+        const index = findEarliestStartTimeIndexAfterGivenTime(way[i].way, time)
+        const go = way[i].way[index].start
+        if (isTimeBeforeSpecificTime(time, arrive))
+          result.push({
+            type: 'wait',
+            path: `等高铁`,
+            go: time,
+            arrive: go,
+            past: calculateTimeDifferenceAsString(time, go),
+          })
+        time = arrive
+        result.push({
+          type: 'railway',
+          path: `${way[i].from}-${way[i].to}`,
+          go,
+          arrive,
+          past: calculateTimeDifferenceAsString(go, arrive),
+        })
+      }
+      if (way[i].eat === true && haslunch !== '吃过啦') {
+        haslunch = true
+        i = way.length
+        result.length = 0
+        timeInit()
+      }
+    }
+    if (shouldlunch && isTimeBeforeSpecificTime(time, '12:00')) {
+      shouldlunch = false
+      const go = time
+      time = subtractMinutesFromTime(time, -40)
+      const arrive = time
+      result.push({
+        type: 'eat',
+        path: `吃饭`,
+        go,
+        arrive,
+        past: calculateTimeDifferenceAsString(go, arrive),
+      })
+    }
+    paths.push(...result)
+    if (result.length === 0) console.log(way)
+    result.length = 0
   }
+  updatedPaths.length = 0
+  for (let i = 0; i < paths.length; i++) {
+    const currentPath = paths[i]
+    if (i > 0) {
+      const previousPath = paths[i - 1]
+      if (isTimeBeforeSpecificTime(previousPath.arrive, currentPath.go)) {
+        const past = calculateTimeDifferenceAsString(previousPath.arrive, currentPath.go)
+        const freeTime = {
+          path: '空闲',
+          type: 'free',
+          go: previousPath.arrive,
+          arrive: currentPath.go,
+          past: past,
+        }
+        updatedPaths.push(freeTime)
+      }
+    }
+    updatedPaths.push(currentPath)
+  }
+  console.log(updatedPaths)
 }
-if (shouldlunch) {
-  shouldlunch = false
-  const go = time
-  time = subtractMinutesFromTime(time, -40)
-  const arrive = time
-  result.push({
-    type: 'eat',
-    path: `吃饭`,
-    go,
-    arrive,
-    past: calculateTimeDifferenceAsString(go, arrive),
-  })
-}
-result.push({
-  type: 'foot',
-  path: `入场`,
-  go: time,
-  arrive: startTime,
-  past: calculateTimeDifferenceAsString(time, startTime),
-})
-result.push({
-  type: 'main',
-  path: festivalName,
-  go: startTime,
-  arrive: endTime,
-  past: calculateTimeDifferenceAsString(startTime, endTime),
-})
+render()
+
 time = endTime
 if (isTimeBeforeSpecificTime('16:00', time)) {
   const go = time
@@ -301,58 +506,58 @@ const way2 = [
 ]
 time = '23:00'
 const templength = result.length
-for (let i = 0; i < way2.length; i++) {
-  if (way2[i].type === 'foot') {
-    const arrive = time
-    time = subtractMinutesFromTime(time, way2[i].m)
-    const go = time
-    result.push({
-      path: `${way2[i].from}-${way2[i].to}`,
-      go,
-      arrive,
-      past: calculateTimeDifferenceAsString(go, arrive),
-    })
-  }
-  if (way2[i].type === 'bus') {
-    const lastTime = time
-    time = subtractMinutesFromTime(time, way2[i].m)
-    const go = findMaxTimeBeforeEndTime(way2[i].start, time)
-    time = go
-    const arrive = subtractMinutesFromTime(go, -way2[i].m)
-    result.push({
-      path: `公交车空闲时间`,
-      go: arrive,
-      arrive: lastTime,
-      past: calculateTimeDifferenceAsString(arrive, lastTime),
-    })
-    result.push({
-      path: `${way2[i].from}-${way2[i].to}`,
-      go,
-      arrive,
-      past: calculateTimeDifferenceAsString(go, arrive),
-    })
-  }
-  if (way2[i].type === 'railway') {
-    const endList = way2[i].way.map((it) => it.end)
-    const go = findLatestEndTimeBeforeGivenTime(way2[i].way, time)
-    const index = findLatestEndTimeIndexBeforeGivenTime(way2[i].way, time)
-    const arrive = way2[i].way[index].end
-    time = subtractMinutesFromTime(go, 15)
-    result.push({
-      path: `${way2[i].from}-${way2[i].to}`,
-      go,
-      arrive,
-      past: calculateTimeDifferenceAsString(go, arrive),
-    })
-  }
-  if (haslunch !== '吃过啦' && isTimeBeforeSpecificTime(time, '10:00')) {
-    haslunch = true
-    shouldlunch = true
-    i = way2.length
-    result.length = 0
-    timeInit()
-  }
-}
+// for (let i = 0; i < way2.length; i++) {
+//   if (way2[i].type === 'foot') {
+//     const arrive = time
+//     time = subtractMinutesFromTime(time, way2[i].m)
+//     const go = time
+//     result.push({
+//       path: `${way2[i].from}-${way2[i].to}`,
+//       go,
+//       arrive,
+//       past: calculateTimeDifferenceAsString(go, arrive),
+//     })
+//   }
+//   if (way2[i].type === 'bus') {
+//     const lastTime = time
+//     time = subtractMinutesFromTime(time, way2[i].m)
+//     const go = findMaxTimeBeforeEndTime(way2[i].start, time)
+//     time = go
+//     const arrive = subtractMinutesFromTime(go, -way2[i].m)
+//     result.push({
+//       path: `公交车空闲时间`,
+//       go: arrive,
+//       arrive: lastTime,
+//       past: calculateTimeDifferenceAsString(arrive, lastTime),
+//     })
+//     result.push({
+//       path: `${way2[i].from}-${way2[i].to}`,
+//       go,
+//       arrive,
+//       past: calculateTimeDifferenceAsString(go, arrive),
+//     })
+//   }
+//   if (way2[i].type === 'railway') {
+//     const endList = way2[i].way.map((it) => it.end)
+//     const go = findLatestEndTimeBeforeGivenTime(way2[i].way, time)
+//     const index = findLatestEndTimeIndexBeforeGivenTime(way2[i].way, time)
+//     const arrive = way2[i].way[index].end
+//     time = subtractMinutesFromTime(go, 15)
+//     result.push({
+//       path: `${way2[i].from}-${way2[i].to}`,
+//       go,
+//       arrive,
+//       past: calculateTimeDifferenceAsString(go, arrive),
+//     })
+//   }
+//   if (haslunch !== '吃过啦' && isTimeBeforeSpecificTime(time, '10:00')) {
+//     haslunch = true
+//     shouldlunch = true
+//     i = way2.length
+//     result.length = 0
+//     timeInit()
+//   }
+// }
 result.length = templength
 result.push({
   type: 'free',
@@ -361,77 +566,77 @@ result.push({
   arrive: time,
   past: calculateTimeDifferenceAsString(eatedTime, time),
 })
-for (let i = way2.length - 1; i >= 0; i--) {
-  if (way2[i].type === 'foot') {
-    const go = time
-    time = subtractMinutesFromTime(time, -way2[i].m)
-    const arrive = time
-    result.push({
-      type: 'foot',
-      path: `${way2[i].from}-${way2[i].to}`,
-      go,
-      arrive,
-      past: calculateTimeDifferenceAsString(go, arrive),
-    })
-  }
-  if (way2[i].type === 'bus') {
-    const go = subtractMinutesFromTime(findMinTimeAfterStartTime(way2[i].start, time), 0)
-    const arrive = subtractMinutesFromTime(go, -way2[i].m)
-    if (isTimeBeforeSpecificTime(time, go))
-      result.push({
-        type: 'wait',
-        path: `等公交车`,
-        go: time,
-        arrive: go,
-        past: calculateTimeDifferenceAsString(time, go),
-      })
-    time = arrive
-    result.push({
-      type: 'bus',
-      path: `${way2[i].from}-${way2[i].to}`,
-      go,
-      arrive,
-      past: calculateTimeDifferenceAsString(go, arrive),
-    })
-  }
-  if (way2[i].type === 'railway') {
-    const startList = way2[i].way.map((it) => it.start)
-    const lastTime = time
-    time = subtractMinutesFromTime(time, -15)
-    result.push({
-      type: 'wait',
-      path: `防止错过高铁`,
-      go: lastTime,
-      arrive: time,
-      past: calculateTimeDifferenceAsString(lastTime, time),
-    })
-    const arrive = subtractMinutesFromTime(findEarliestStartTimeAfterGivenTime(way2[i].way, time), 0)
-    const index = findEarliestStartTimeIndexAfterGivenTime(way2[i].way, time)
-    const go = way2[i].way[index].start
-    if (isTimeBeforeSpecificTime(time, go))
-      result.push({
-        type: 'wait',
-        path: `等高铁`,
-        go: time,
-        arrive: go,
-        past: calculateTimeDifferenceAsString(time, go),
-      })
-    time = arrive
-    result.push({
-      type: 'railway',
-      path: `${way2[i].from}-${way2[i].to}`,
-      go,
-      arrive,
-      past: calculateTimeDifferenceAsString(go, arrive),
-    })
-  }
-  if (haslunch !== '吃过啦' && isTimeBeforeSpecificTime(time, '10:00')) {
-    haslunch = true
-    i = way2.length
-    result.length = 0
-    timeInit()
-  }
-}
+// for (let i = way2.length - 1; i >= 0; i--) {
+//   if (way2[i].type === 'foot') {
+//     const go = time
+//     time = subtractMinutesFromTime(time, -way2[i].m)
+//     const arrive = time
+//     result.push({
+//       type: 'foot',
+//       path: `${way2[i].from}-${way2[i].to}`,
+//       go,
+//       arrive,
+//       past: calculateTimeDifferenceAsString(go, arrive),
+//     })
+//   }
+//   if (way2[i].type === 'bus') {
+//     const go = subtractMinutesFromTime(findMinTimeAfterStartTime(way2[i].start, time), 0)
+//     const arrive = subtractMinutesFromTime(go, -way2[i].m)
+//     if (isTimeBeforeSpecificTime(time, go))
+//       result.push({
+//         type: 'wait',
+//         path: `等公交车`,
+//         go: time,
+//         arrive: go,
+//         past: calculateTimeDifferenceAsString(time, go),
+//       })
+//     time = arrive
+//     result.push({
+//       type: 'bus',
+//       path: `${way2[i].from}-${way2[i].to}`,
+//       go,
+//       arrive,
+//       past: calculateTimeDifferenceAsString(go, arrive),
+//     })
+//   }
+//   if (way2[i].type === 'railway') {
+//     const startList = way2[i].way.map((it) => it.start)
+//     const lastTime = time
+//     time = subtractMinutesFromTime(time, -15)
+//     result.push({
+//       type: 'wait',
+//       path: `防止错过高铁`,
+//       go: lastTime,
+//       arrive: time,
+//       past: calculateTimeDifferenceAsString(lastTime, time),
+//     })
+//     const arrive = subtractMinutesFromTime(findEarliestStartTimeAfterGivenTime(way2[i].way, time), 0)
+//     const index = findEarliestStartTimeIndexAfterGivenTime(way2[i].way, time)
+//     const go = way2[i].way[index].start
+//     if (isTimeBeforeSpecificTime(time, go))
+//       result.push({
+//         type: 'wait',
+//         path: `等高铁`,
+//         go: time,
+//         arrive: go,
+//         past: calculateTimeDifferenceAsString(time, go),
+//       })
+//     time = arrive
+//     result.push({
+//       type: 'railway',
+//       path: `${way2[i].from}-${way2[i].to}`,
+//       go,
+//       arrive,
+//       past: calculateTimeDifferenceAsString(go, arrive),
+//     })
+//   }
+//   if (haslunch !== '吃过啦' && isTimeBeforeSpecificTime(time, '10:00')) {
+//     haslunch = true
+//     i = way2.length
+//     result.length = 0
+//     timeInit()
+//   }
+// }
 // 对数组按时间排序
 result.sort((a, b) => {
   // 提取出发时间的小时和分钟
@@ -446,7 +651,7 @@ result.sort((a, b) => {
   // 如果小时相同，按分钟排序
   return aMinutes - bMinutes
 })
-console.log(result)
+// console.log(result)
 function timeInit() {
   time = startTime
   time = subtractMinutesFromTime(startTime, 30)

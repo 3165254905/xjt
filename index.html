@@ -24,45 +24,510 @@
       .idle-time {
         background-color: lightgreen;
       }
+
+      .hidden {
+        display: none;
+      }
+
+      /* 默认的侧边栏样式 */
+      #sidebar {
+        position: fixed;
+        left: -200px; /* 默认隐藏 */
+        top: 0;
+        height: 100%;
+        width: 200px; /* 默认宽度 */
+        background-color: #333;
+        padding-top: 20px;
+        color: #fff;
+        transition: left 0.3s; /* 添加过渡效果 */
+        z-index: 999; /* 确保在顶部 */
+      }
+
+      #sidebar ul {
+        list-style-type: none;
+        padding: 0;
+        margin-top: 25px;
+      }
+
+      #sidebar ul li {
+        padding: 10px;
+      }
+
+      #sidebar ul li a {
+        color: #fff;
+        text-decoration: none;
+      }
+
+      #sidebar ul li a:hover {
+        /* 添加鼠标悬停样式 */
+        background-color: #555;
+      }
+
+      #sidebar ul li.active a {
+        /* 添加选中样式 */
+        background-color: #555;
+      }
+
+      #menuButton {
+        position: fixed;
+        left: 20px;
+        top: 20px;
+        z-index: 1000;
+        cursor: pointer;
+        color: #fff;
+        font-size: 12px;
+        background-color: #333;
+        width: 20px; /* 调整按钮的宽度 */
+        height: 15px; /* 调整按钮的高度 */
+        line-height: 15px; /* 设置行高等于按钮高度 */
+        padding: 0; /* 移除内边距 */
+        border: 2px solid #fff;
+        border-radius: 5px;
+        text-align: center; /* 文本居中 */
+      }
+
+      /* 避免导航按钮和侧边栏文字重叠 */
+      #sidebar ul li {
+        padding-left: 20px;
+        display: block; /* 让背景颜色占满整个侧边栏宽度 */
+        height: 30px; /* 设置背景颜色的高度 */
+        line-height: 30px;
+      }
+
+      /* 添加一个新的类名来设置选中状态的样式 */
+      .active {
+        background-color: #555;
+      }
+
+      /* 在手机端设置侧边栏的宽度 */
+      @media screen and (max-width: 768px) {
+        #sidebar {
+          width: 100px; /* 在手机端设置较小的宽度 */
+        }
+        #sidebar ul li {
+          text-align: center;
+          padding-left: 0;
+        }
+      }
+
+      .way-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      }
+
+      .way {
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        padding: 10px;
+        width: 80%;
+        max-width: 600px;
+        box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+      }
+
+      .way-details {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: space-between;
+        margin-top: 10px;
+      }
+
+      .way-details-item {
+        width: 48%;
+      }
+
+      .way-type {
+        font-weight: bold;
+        color: #333;
+      }
+
+      .way-time {
+        color: #666;
+      }
+
+      .add-button {
+        background-color: #4caf50;
+        border: none;
+        color: white;
+        padding: 10px 20px;
+        text-align: center;
+        text-decoration: none;
+        display: inline-block;
+        font-size: 16px;
+        margin: 4px 2px;
+        cursor: pointer;
+        border-radius: 5px;
+      }
+
+      .add-button:hover {
+        background-color: #45a049;
+      }
+
+      .modal {
+        display: none; /* 默认隐藏 */
+        position: fixed;
+        z-index: 1;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        overflow: auto; /* 滚动条 */
+        background-color: rgb(0, 0, 0); /* 黑色背景，稍加透明度 */
+        background-color: rgba(0, 0, 0, 0.4);
+      }
+
+      .modal-content {
+        background-color: #fefefe; /* 白色背景 */
+        margin: 15% auto; /* 在页面顶部垂直居中 */
+        padding: 20px;
+        border: 1px solid #888;
+        width: 80%; /* 窗口宽度 */
+      }
+
+      .close {
+        color: #aaa;
+        float: right;
+        font-size: 28px;
+        font-weight: bold;
+      }
+
+      .close:hover,
+      .close:focus {
+        color: black;
+        text-decoration: none;
+        cursor: pointer;
+      }
+
+      .modal:not(.hidden) {
+        display: block;
+      }
     </style>
   </head>
   <body>
-    <table>
-      <thead>
-        <tr>
-          <th>类型</th>
-          <th>路径</th>
-          <th>出发时间</th>
-          <th>到达时间</th>
-          <th>历时</th>
-        </tr>
-      </thead>
-      <tbody id="tableBody">
-        <!-- 表格内容将在此动态生成 -->
-      </tbody>
-    </table>
+    <!-- 菜单按钮 -->
+    <div id="menuButton" onclick="toggleActive()">&#9776;</div>
+    <!-- 侧边导航栏 -->
+    <nav id="sidebar">
+      <ul>
+        <li class="active"><a href="#" id="tableLink" onclick="setActive(this)">表格视图</a></li>
+        <li><a href="#" id="formLink" onclick="setActive(this)">修改界面</a></li>
+      </ul>
+    </nav>
+    <!-- 原始表格内容 -->
+    <div id="tableContent">
+      <table>
+        <thead>
+          <tr>
+            <th>类型</th>
+            <th>路径</th>
+            <th>出发时间</th>
+            <th>到达时间</th>
+            <th>历时</th>
+          </tr>
+        </thead>
+        <tbody id="tableBody">
+          <!-- 表格内容将在此动态生成 -->
+        </tbody>
+      </table>
+    </div>
+    <!-- 新增的修改界面 -->
+    <div id="formContent" class="hidden">
+      <div class="way-container">
+        <!-- JavaScript 会动态添加路径图 -->
+      </div>
+    </div>
+    <!-- 新增窗口 -->
+    <div id="addModal" class="modal hidden">
+      <div class="modal-content">
+        <span class="close" onclick="closeModal()">&times;</span>
+        <h2>新增路径</h2>
+        <form id="addForm">
+          <label for="type">类型：</label>
+          <select id="type">
+            <option value="foot">步行</option>
+            <option value="bus">公交车</option>
+            <option value="railway">火车</option>
+            <!-- 添加更多类型 -->
+          </select>
+          <br />
+          <label for="from">出发地：</label>
+          <input type="text" id="from" required />
+          <br />
+          <label for="to">目的地：</label>
+          <input type="text" id="to" required />
+          <br />
+          <label for="m">耗时（分钟）：</label>
+          <input type="number" id="m" />
+          <br />
+          <!-- 添加更多输入字段 -->
+          <input type="submit" value="新增" />
+        </form>
+      </div>
+    </div>
     <script type="text/javascript" src="./xjt.js"></script>
     <script>
-      const data = result
-
       const tableBody = document.getElementById('tableBody')
-
-      // 填充数据到表格中
-      result.forEach((item) => {
-        const row = document.createElement('tr')
-        // 判断是否为公交车空闲时间或高铁空闲时间，若是，则添加 idle-time 类
-        if (item.type === 'bus' || item.type === 'railway') {
-          row.classList.add('idle-time')
-        }
-        row.innerHTML = `
+      const wayContainer = document.querySelector('.way-container')
+      function render1() {
+        const data = updatedPaths
+        tableBody.innerHTML = ``
+        // 填充数据到表格中
+        data.forEach((item) => {
+          const row = document.createElement('tr')
+          // 判断是否为公交车空闲时间或高铁空闲时间，若是，则添加 idle-time 类
+          if (item.type === 'bus' || item.type === 'railway') {
+            row.classList.add('idle-time')
+          }
+          row.innerHTML = `
             <td>${item.type}</td>
             <td>${item.path}</td>
             <td>${item.go}</td>
             <td>${item.arrive}</td>
             <td>${item.past}</td>
         `
-        tableBody.appendChild(row)
+          tableBody.appendChild(row)
+        })
+      }
+      render1()
+      // 函数用于重新渲染路线图
+      function renderWayContainer() {
+        // 清空原有内容
+        wayContainer.innerHTML = ''
+
+        // 遍历每个路线，创建对应的 div 元素并添加到 wayContainer 中
+        ways.forEach((way, i) => {
+          const wayElement = document.createElement('div')
+          wayElement.classList.add('way')
+
+          let detailsHTML = `
+            <div class="way-type">${way.type}</div>
+            <div>从 ${way.from} 到 ${way.to}</div>
+        `
+
+          if (way.m) {
+            detailsHTML += `<div class="way-details-item">耗时：${way.m} 分钟</div>`
+          }
+
+          if (way.start) {
+            detailsHTML += `<div class="way-details-item">发车时间：`
+            if (Array.isArray(way.start)) {
+              detailsHTML += `${way.start.join(', ')}`
+            } else {
+              detailsHTML += `${way.start}`
+            }
+            detailsHTML += `</div>`
+          }
+
+          if (way.way) {
+            detailsHTML += `<div class="way-details-item">途经时间：`
+            way.way.forEach((time) => {
+              detailsHTML += `<div class="way-time">从 ${time.start} 到 ${time.end}</div>`
+            })
+            detailsHTML += `</div>`
+          }
+
+          wayElement.innerHTML = detailsHTML
+          wayContainer.appendChild(wayElement)
+
+          // 在每个路线后面插入新增按钮，除非是最后一个路线
+          if (i < ways.length) {
+            const addButton = document.createElement('button')
+            addButton.textContent = '新增'
+            addButton.classList.add('add-button')
+            wayContainer.appendChild(addButton)
+
+            // 在按钮上添加点击事件监听器，点击时调用 addPath 函数
+            addButton.addEventListener('click', () => {
+              addPath(i) // 将新增路径插入到当前路线后面
+            })
+          }
+        })
+        // 在最前面添加一个新增按钮
+        const addButton = document.createElement('button')
+        addButton.textContent = '新增'
+        addButton.classList.add('add-button')
+        wayContainer.insertBefore(addButton, wayContainer.firstChild)
+        // 在按钮上添加点击事件监听器，点击时弹出新增窗口
+        addButton.addEventListener('click', () => {
+          openModal() // 调用 openModal() 函数以显示新增窗口
+          // 保存索引0作为参数传递给 addPath 函数
+          addPath(0)
+        })
+      }
+
+      renderWayContainer()
+      // 获取侧边栏、菜单按钮、表格视图和修改界面的引用
+      const sidebar = document.getElementById('sidebar')
+      const menuButton = document.getElementById('menuButton')
+      const tableContent = document.getElementById('tableContent')
+      const formContent = document.getElementById('formContent')
+
+      // 获取侧边导航栏的链接
+      const tableLink = document.getElementById('tableLink')
+      const formLink = document.getElementById('formLink')
+
+      // 添加事件监听器以显示/隐藏侧边栏
+      menuButton.addEventListener('click', () => {
+        // 如果侧边栏是隐藏的，则显示；否则隐藏
+        if (sidebar.style.left === '-200px') {
+          sidebar.style.left = '0'
+          // 缩小主界面内容
+          if (!isMobile()) {
+            tableContent.style.marginLeft = '200px'
+            formContent.style.marginLeft = '200px'
+          }
+        } else {
+          sidebar.style.left = '-200px'
+          // 恢复主界面内容大小
+          tableContent.style.marginLeft = '0'
+          formContent.style.marginLeft = '0'
+        }
       })
+
+      // 添加事件监听器以切换界面
+      tableLink.addEventListener('click', () => {
+        tableContent.classList.remove('hidden')
+        formContent.classList.add('hidden')
+      })
+
+      formLink.addEventListener('click', () => {
+        tableContent.classList.add('hidden')
+        formContent.classList.remove('hidden')
+        // 显示路线图
+        wayContainer.classList.remove('hidden')
+      })
+
+      // 函数用于检测是否为手机端
+      function isMobile() {
+        return window.innerWidth <= 768 // 768px是典型的平板电脑宽度
+      }
+
+      // 设置选中状态
+      function setActive(element) {
+        // 先移除所有已经被选中的元素的active类
+        const links = document.querySelectorAll('nav ul li')
+        links.forEach((link) => link.classList.remove('active'))
+        // 为当前选中的元素添加active类
+        element.parentElement.classList.add('active')
+      }
+
+      // 添加事件监听器以显示/隐藏侧边栏
+      function toggleActive() {
+        const menuButton = document.getElementById('menuButton')
+        menuButton.classList.toggle('active')
+      }
+
+      function addAddButton(container) {
+        const addButton = document.createElement('button')
+        addButton.textContent = '新增'
+        addButton.classList.add('add-button')
+        container.appendChild(addButton)
+
+        // 在按钮上添加点击事件监听器，点击时弹出新增窗口
+        addButton.addEventListener('click', () => {
+          // 创建遮罩层
+          const overlay = document.createElement('div')
+          overlay.classList.add('overlay')
+          document.body.appendChild(overlay)
+
+          // 创建新增窗口
+          const addWindow = document.createElement('div')
+          addWindow.classList.add('add-window')
+          addWindow.innerHTML = `
+      <h2>新增路线</h2>
+      <label for="routeType">类型：</label>
+      <select id="routeType">
+        <option value="foot">步行</option>
+        <option value="bus">公交车</option>
+        <option value="railway">火车</option>
+        <!-- 在这里添加其他类型 -->
+      </select>
+      <!-- 在这里添加其他输入字段 -->
+      <button id="confirmButton">确认</button>
+      <button id="cancelButton">取消</button>
+    `
+          // 在这里调用 openModal() 函数来显示新增窗口
+          openModal()
+
+          document.body.appendChild(addWindow)
+
+          // 添加确认按钮点击事件监听器
+          const confirmButton = document.getElementById('confirmButton')
+          confirmButton.addEventListener('click', () => {
+            // 获取新增窗口中的数据
+            const routeType = document.getElementById('routeType').value
+            // 获取其他输入字段的数据
+            // 在这里添加获取其他输入字段数据的逻辑
+
+            // 在这里可以将获取到的数据发送到后端保存或执行其他操作
+
+            // 关闭新增窗口和遮罩层
+            document.body.removeChild(addWindow)
+            document.body.removeChild(overlay)
+          })
+
+          // 添加取消按钮点击事件监听器
+          const cancelButton = document.getElementById('cancelButton')
+          cancelButton.addEventListener('click', () => {
+            // 关闭新增窗口和遮罩层
+            document.body.removeChild(addWindow)
+            document.body.removeChild(overlay)
+          })
+        })
+      }
+
+      // 函数用于将新增的路径添加到正确的位置
+      function addPath(index) {
+        // 显示新增窗口
+        openModal()
+
+        // 获取表单元素
+        const addForm = document.getElementById('addForm')
+
+        // 添加表单提交事件监听器
+        // 提交新增表单
+        document.getElementById('addForm').addEventListener('submit', function (event) {
+          event.preventDefault()
+
+          // 获取表单数据
+          const type = document.getElementById('type').value
+          const from = document.getElementById('from').value
+          const to = document.getElementById('to').value
+          const m = document.getElementById('m').value
+
+          // 创建路径对象
+          const newWay = { type, from, to, m }
+
+          // 将新增路径添加到指定的索引位置
+          ways.splice(index + 1, 0, newWay)
+
+          // 重新渲染路线图
+          refresh()
+
+          // 清空表单
+          document.getElementById('addForm').reset()
+
+          // 关闭新增窗口
+          closeModal()
+        })
+      }
+
+      // 显示新增窗口
+      function openModal() {
+        const modal = document.getElementById('addModal')
+        modal.classList.remove('hidden')
+      }
+
+      // 关闭新增窗口
+      function closeModal() {
+        const modal = document.getElementById('addModal')
+        modal.classList.add('hidden')
+      }
+      function refresh() {
+        render()
+        render1()
+        renderWayContainer()
+      }
     </script>
   </body>
 </html>

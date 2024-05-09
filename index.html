@@ -190,7 +190,10 @@
         font-size: 28px;
         font-weight: bold;
       }
-
+      /* 添加一个新的类名来隐藏字段 */
+      .hidden-field {
+        display: none;
+      }
       .close:hover,
       .close:focus {
         color: black;
@@ -200,6 +203,54 @@
 
       .modal:not(.hidden) {
         display: block;
+      }
+
+      /* 添加不同语义的背景颜色 */
+      .free-time {
+        background-color: #e6e6e6; /* 灰色 */
+      }
+
+      .wait-time {
+        background-color: #ffcc66; /* 橙黄色 */
+      }
+
+      .foot-time {
+        background-color: #66cc99; /* 浅绿色 */
+      }
+
+      .getup-time {
+        background-color: #99ccff; /* 浅蓝色 */
+      }
+
+      .eat-time {
+        background-color: #ff9999; /* 浅红色 */
+      }
+
+      .main-time {
+        background-color: #ffff66; /* 浅黄色 */
+      }
+
+      .time-row {
+        background-color: #f0f0f0; /* 淡灰色 */
+      }
+
+      .edit-button {
+        background-color: #4caf50; /* 绿色 */
+        border: none;
+        color: white;
+        padding: 8px 16px;
+        text-align: center;
+        text-decoration: none;
+        display: inline-block;
+        font-size: 16px;
+        margin: 4px 2px;
+        transition-duration: 0.4s;
+        cursor: pointer;
+      }
+
+      .edit-button:hover {
+        background-color: #45a049; /* 深绿色 */
+        color: white;
       }
     </style>
   </head>
@@ -243,23 +294,58 @@
         <h2>新增路径</h2>
         <form id="addForm">
           <label for="type">类型：</label>
-          <select id="type">
+          <select id="type" onchange="updateUI()">
             <option value="foot">步行</option>
             <option value="bus">公交车</option>
             <option value="railway">火车</option>
+            <option value="main">主要活动</option>
             <!-- 添加更多类型 -->
           </select>
           <br />
-          <label for="from">出发地：</label>
-          <input type="text" id="from" required />
-          <br />
-          <label for="to">目的地：</label>
-          <input type="text" id="to" required />
-          <br />
-          <label for="m">耗时（分钟）：</label>
-          <input type="number" id="m" />
-          <br />
-          <!-- 添加更多输入字段 -->
+          <div id="fromField" class="form-field">
+            <label for="from">出发地：</label>
+            <input type="text" id="from" />
+          </div>
+          <div id="toField" class="form-field">
+            <label for="to">目的地：</label>
+            <input type="text" id="to" />
+          </div>
+          <div id="mField" class="form-field">
+            <label for="m">耗时（分钟）：</label>
+            <input type="number" id="m" />
+          </div>
+          <div id="startFields" class="hidden-field">
+            <!-- 公交车的发车时间字段 -->
+            <label>发车时间：</label>
+            <div id="startInputs">
+              <!-- 第一个发车时间输入框 -->
+              <input type="time" class="start-time" />
+            </div>
+            <button type="button" onclick="addStartTime()">添加更多</button>
+          </div>
+          <div id="wayFields" class="hidden-field">
+            <!-- 火车的途径时间字段 -->
+            <label>途径时间：</label>
+            <div id="wayInputs">
+              <!-- 第一个途径时间输入框 -->
+              <input type="time" class="way-time" />
+              <span> - </span>
+              <input type="time" class="way-time" />
+            </div>
+            <button type="button" onclick="addWayTime()">添加更多</button>
+          </div>
+          <div id="additionalFields" class="hidden-field">
+            <!-- 主要活动的额外字段 -->
+            <label for="name">名称：</label>
+            <input type="text" id="name" />
+            <br />
+            <label for="startTime">开始时间：</label>
+            <input type="time" id="startTime" />
+            <br />
+            <label for="endTime">结束时间：</label>
+            <input type="time" id="endTime" />
+            <br />
+          </div>
           <input type="submit" value="新增" />
         </form>
       </div>
@@ -268,27 +354,98 @@
     <script>
       const tableBody = document.getElementById('tableBody')
       const wayContainer = document.querySelector('.way-container')
-      function render1() {
-        const data = updatedPaths
-        tableBody.innerHTML = ``
-        // 填充数据到表格中
-        data.forEach((item) => {
+      // 修改渲染表格的函数
+      function renderTable() {
+        const tableBody = document.getElementById('tableBody')
+        tableBody.innerHTML = ''
+
+        updatedPaths.forEach((item, index) => {
           const row = document.createElement('tr')
-          // 判断是否为公交车空闲时间或高铁空闲时间，若是，则添加 idle-time 类
+          row.setAttribute('data-index', index) // 添加行的唯一标识符
+
+          // 设置type列的背景颜色
+          const typeCell = document.createElement('td')
+          typeCell.textContent = item.type
           if (item.type === 'bus' || item.type === 'railway') {
             row.classList.add('idle-time')
+            row.style.cursor = 'pointer' // 添加pointer鼠标
+          } else if (item.type === 'free') {
+            typeCell.classList.add('free-time')
+          } else if (item.type === 'wait') {
+            typeCell.classList.add('wait-time')
+          } else if (item.type === 'foot') {
+            typeCell.classList.add('foot-time')
+          } else if (item.type === 'getup') {
+            typeCell.classList.add('getup-time')
+          } else if (item.type === 'eat') {
+            typeCell.classList.add('eat-time')
+          } else if (item.type === 'main') {
+            typeCell.classList.add('main-time')
           }
-          row.innerHTML = `
-            <td>${item.type}</td>
+          row.appendChild(typeCell)
+
+          row.innerHTML += `
             <td>${item.path}</td>
             <td>${item.go}</td>
             <td>${item.arrive}</td>
             <td>${item.past}</td>
         `
+
           tableBody.appendChild(row)
+
+          // 添加点击事件监听器
+          row.addEventListener('click', () => {
+            toggleTimeDisplay(row)
+          })
         })
       }
-      render1()
+
+      renderTable()
+      // 切换时间显示状态的函数
+      function toggleTimeDisplay(row) {
+        const route = row.children[1].textContent.split('-') // 获取当前行的出发地和目的地
+
+        // 如果路线长度不为2，则返回，因为无法确定出发地和目的地
+        if (route.length !== 2) {
+          return
+        }
+
+        const from = route[0].trim() // 出发地
+        const to = route[1].trim() // 目的地
+
+        // 根据出发地和目的地找到对应的项
+        const item = ways.find((way) => way.from === from && way.to === to)
+        const type = item.type
+        if (type !== 'bus' && type !== 'railway') return
+
+        // 如果找到对应的项，则获取发车时间或途径时间
+        if (item) {
+          const startTime = item.start
+          const wayTimes = item.way && item.way.map((time) => `${time.start} - ${time.end}`).join(', ')
+
+          // 显示所有的发车时间或途径时间
+          const allTimes = startTime || wayTimes || ''
+
+          // 创建一个新的行来显示所有时间
+          const timeRow = document.createElement('tr')
+          const timeCell = document.createElement('td')
+          timeCell.colSpan = 5 // 横跨整个表格的列
+          timeCell.textContent = `时间：${allTimes}`
+          timeRow.appendChild(timeCell)
+
+          // 检查是否已经显示时间，如果是，则移除时间行，否则添加时间行到表格
+          if (row.classList.contains('show-time')) {
+            row.classList.remove('show-time')
+            if (row.nextSibling && row.nextSibling.classList.contains('time-row')) {
+              row.nextSibling.remove()
+            }
+          } else {
+            row.classList.add('show-time')
+            timeRow.classList.add('time-row')
+            row.insertAdjacentElement('afterend', timeRow)
+          }
+        }
+      }
       // 函数用于重新渲染路线图
       function renderWayContainer() {
         // 清空原有内容
@@ -299,16 +456,32 @@
           const wayElement = document.createElement('div')
           wayElement.classList.add('way')
 
-          let detailsHTML = `
-            <div class="way-type">${way.type}</div>
-            <div>从 ${way.from} 到 ${way.to}</div>
-        `
-
+          let detailsHTML
+          if (way.type !== 'main') {
+            detailsHTML = `
+    <div class="way-type">${way.type}</div>
+    <div>从 ${way.from} 到 ${way.to}</div>
+  `
+          } else {
+            detailsHTML = `
+    <div class="way-type">${way.type}</div>
+    <div>${way.name}</div>
+    <div>开始时间：${way.start}</div>
+    <div>结束时间：${way.end}</div>
+  `
+          }
+          // 添加到达后是否吃饭的复选框选项
+          detailsHTML += `
+  <div>
+    <label for="eat-${i}">到达后是否吃饭：</label>
+    <input type="checkbox" id="eat-${i}" ${way.eat ? 'checked' : ''} onchange="updateEat(${i}, this.checked)">
+  </div>
+`
           if (way.m) {
             detailsHTML += `<div class="way-details-item">耗时：${way.m} 分钟</div>`
           }
 
-          if (way.start) {
+          if (way.start && way.type !== 'main') {
             detailsHTML += `<div class="way-details-item">发车时间：`
             if (Array.isArray(way.start)) {
               detailsHTML += `${way.start.join(', ')}`
@@ -325,7 +498,20 @@
             })
             detailsHTML += `</div>`
           }
+          // 在显示路线详情信息的地方，添加最迟到达时间的输入框
+          detailsHTML += `
+  <div>
+    <label for="mustbeentime-${i}">最迟到达时间：</label>
+    <input type="time" id="mustbeentime-${i}" value="${
+            way.mustbeentime || ''
+          }" onchange="updateMustBeEntime(${i}, this.value)">
+  </div>
+`
 
+          // 添加修改按钮
+          detailsHTML += `
+            <button class="edit-button" onclick="editWay(${i})">修改</button>
+        `
           wayElement.innerHTML = detailsHTML
           wayContainer.appendChild(wayElement)
 
@@ -339,9 +525,11 @@
             // 在按钮上添加点击事件监听器，点击时调用 addPath 函数
             addButton.addEventListener('click', () => {
               addPath(i) // 将新增路径插入到当前路线后面
+              console.log(`addPath ${i}`)
             })
           }
         })
+
         // 在最前面添加一个新增按钮
         const addButton = document.createElement('button')
         addButton.textContent = '新增'
@@ -351,8 +539,133 @@
         addButton.addEventListener('click', () => {
           openModal() // 调用 openModal() 函数以显示新增窗口
           // 保存索引0作为参数传递给 addPath 函数
-          addPath(0)
+          addPath(-1)
         })
+        // 在更新状态时调用的函数，更新到达后是否吃饭的选项
+        window.updateEat = function (index, checked) {
+          ways[index].eat = checked
+          console.log(`Way ${index} eat status updated: ${checked}`)
+          refresh() // 更新界面
+        }
+        // 在更新状态时调用的函数，更新最迟到达时间的选项
+        window.updateMustBeEntime = function (index, value) {
+          ways[index].mustbeentime = value
+          console.log(`Way ${index} must be entime updated: ${value}`)
+          refresh() // 更新界面
+        }
+        // 编辑路线
+        window.editWay = function (index) {
+          // 获取路线信息
+          const way = ways[index]
+
+          // 创建编辑窗口
+          const editModal = document.getElementById('editModal')
+          const modalContent = editModal.querySelector('.modal-content')
+
+          // 清空编辑窗口内容
+          modalContent.innerHTML = ''
+
+          // 创建编辑表单
+          const editForm = document.createElement('form')
+          editForm.id = 'editForm'
+
+          // 添加关闭按钮
+          const closeButton = document.createElement('span')
+          closeButton.classList.add('close')
+          closeButton.innerHTML = '&times;'
+          closeButton.onclick = closeModal
+          editForm.appendChild(closeButton)
+
+          // 添加标题
+          const title = document.createElement('h2')
+          title.textContent = '编辑路径'
+          editForm.appendChild(title)
+
+          // 添加类型选择
+          const typeLabel = document.createElement('label')
+          typeLabel.setAttribute('for', 'editType')
+          typeLabel.textContent = '类型：'
+          editForm.appendChild(typeLabel)
+
+          const typeSelect = document.createElement('select')
+          typeSelect.id = 'editType'
+          typeSelect.onchange = updateUI
+          const types = ['foot', 'bus', 'railway', 'main'] // 添加更多类型
+          types.forEach((type) => {
+            const option = document.createElement('option')
+            option.value = type
+            option.textContent = type.toUpperCase() // 将类型转换为大写显示
+            typeSelect.appendChild(option)
+          })
+          editForm.appendChild(typeSelect)
+
+          // 根据路线类型不同，添加不同的表单项
+          if (way.type !== 'main') {
+            editForm.innerHTML += `
+            <div id="editFromField" class="form-field">
+                <label for="editFrom">出发地：</label>
+                <input type="text" id="editFrom" value="${way.from}">
+            </div>
+            <div id="editToField" class="form-field">
+                <label for="editTo">目的地：</label>
+                <input type="text" id="editTo" value="${way.to}">
+            </div>
+            <div id="editMField" class="form-field">
+                <label for="editM">耗时（分钟）：</label>
+                <input type="number" id="editM" value="${way.m}">
+            </div>
+        `
+          } else {
+            editForm.innerHTML += `
+            <div id="editNameField" class="form-field">
+                <label for="editName">名称：</label>
+                <input type="text" id="editName" value="${way.name}">
+            </div>
+            <div id="editStartTimeField" class="form-field">
+                <label for="editStartTime">开始时间：</label>
+                <input type="time" id="editStartTime" value="${way.start}">
+            </div>
+            <div id="editEndTimeField" class="form-field">
+                <label for="editEndTime">结束时间：</label>
+                <input type="time" id="editEndTime" value="${way.end}">
+            </div>
+        `
+          }
+
+          // 添加提交按钮
+          const submitButton = document.createElement('input')
+          submitButton.type = 'submit'
+          submitButton.value = '保存'
+          editForm.appendChild(submitButton)
+
+          // 监听表单提交事件
+          editForm.addEventListener('submit', function (event) {
+            event.preventDefault() // 阻止表单默认提交行为
+            saveWayChanges(index)
+          })
+
+          // 将编辑表单添加到编辑窗口中
+          modalContent.appendChild(editForm)
+
+          // 显示编辑窗口
+          openModal()
+        }
+
+        // 保存路线修改
+        function saveWayChanges(index) {
+          const editedWay = ways[index]
+          // 根据编辑表单中的值更新路线信息
+          if (editedWay.type !== 'main') {
+            editedWay.from = document.getElementById('editFrom').value
+            editedWay.to = document.getElementById('editTo').value
+          } else {
+            editedWay.name = document.getElementById('editName').value
+            editedWay.start = document.getElementById('editStartTime').value
+            editedWay.end = document.getElementById('editEndTime').value
+          }
+          // 重新渲染路线图
+          renderWayContainer()
+        }
       }
 
       renderWayContainer()
@@ -368,6 +681,7 @@
 
       // 添加事件监听器以显示/隐藏侧边栏
       menuButton.addEventListener('click', () => {
+        const modal = document.getElementById('addModal')
         // 如果侧边栏是隐藏的，则显示；否则隐藏
         if (sidebar.style.left === '-200px') {
           sidebar.style.left = '0'
@@ -375,12 +689,16 @@
           if (!isMobile()) {
             tableContent.style.marginLeft = '200px'
             formContent.style.marginLeft = '200px'
+            modal.style.marginLeft = '200px'
+            modal.style.width = 'calc(100vw - 200px)'
           }
         } else {
           sidebar.style.left = '-200px'
           // 恢复主界面内容大小
           tableContent.style.marginLeft = '0'
           formContent.style.marginLeft = '0'
+          modal.style.marginLeft = '0'
+          modal.style.width = '100vw'
         }
       })
 
@@ -431,21 +749,21 @@
           document.body.appendChild(overlay)
 
           // 创建新增窗口
-          const addWindow = document.createElement('div')
-          addWindow.classList.add('add-window')
-          addWindow.innerHTML = `
-      <h2>新增路线</h2>
-      <label for="routeType">类型：</label>
-      <select id="routeType">
-        <option value="foot">步行</option>
-        <option value="bus">公交车</option>
-        <option value="railway">火车</option>
-        <!-- 在这里添加其他类型 -->
-      </select>
-      <!-- 在这里添加其他输入字段 -->
-      <button id="confirmButton">确认</button>
-      <button id="cancelButton">取消</button>
-    `
+          //       const addWindow = document.createElement('div')
+          //       addWindow.classList.add('add-window')
+          //       addWindow.innerHTML = `
+          //   <h2>新增路线</h2>
+          //   <label for="routeType">类型：</label>
+          //   <select id="routeType">
+          //     <option value="foot">步行</option>
+          //     <option value="bus">公交车</option>
+          //     <option value="railway">火车</option>
+          //     <!-- 在这里添加其他类型 -->
+          //   </select>
+          //   <!-- 在这里添加其他输入字段 -->
+          //   <button id="confirmButton">确认</button>
+          //   <button id="cancelButton">取消</button>
+          // `
           // 在这里调用 openModal() 函数来显示新增窗口
           openModal()
 
@@ -476,7 +794,30 @@
         })
       }
 
-      // 函数用于将新增的路径添加到正确的位置
+      // 定义一个全局变量用于存储表单提交事件监听器
+      let submitEventListener = null
+      // 添加公交车的发车时间字段
+      function addTimeField(containerId) {
+        const container = document.getElementById(containerId)
+        const timeField = document.createElement('input')
+        timeField.type = 'time'
+        container.insertBefore(timeField, container.lastChild)
+      }
+      // 添加火车的途径时间字段
+      function addWayField(containerId) {
+        const container = document.getElementById(containerId)
+        const wayField = document.createElement('div')
+        const startTimeField = document.createElement('input')
+        startTimeField.type = 'time'
+        const separator = document.createElement('span')
+        separator.textContent = ' - '
+        const endTimeField = document.createElement('input')
+        endTimeField.type = 'time'
+        wayField.appendChild(startTimeField)
+        wayField.appendChild(separator)
+        wayField.appendChild(endTimeField)
+        container.insertBefore(wayField, container.lastChild)
+      }
       function addPath(index) {
         // 显示新增窗口
         openModal()
@@ -484,22 +825,77 @@
         // 获取表单元素
         const addForm = document.getElementById('addForm')
 
-        // 添加表单提交事件监听器
-        // 提交新增表单
-        document.getElementById('addForm').addEventListener('submit', function (event) {
+        // 移除之前的事件监听器
+        if (submitEventListener) {
+          addForm.removeEventListener('submit', submitEventListener)
+        }
+
+        // 修改提交事件处理函数以适应新的字段结构
+        submitEventListener = function (event) {
           event.preventDefault()
 
           // 获取表单数据
           const type = document.getElementById('type').value
-          const from = document.getElementById('from').value
-          const to = document.getElementById('to').value
-          const m = document.getElementById('m').value
+          const from = type !== 'main' ? document.getElementById('from').value : ''
+          const to = type !== 'main' ? document.getElementById('to').value : ''
+          const m = type !== 'railway' && type !== 'main' ? document.getElementById('m').value : ''
+          let start = []
+          let way = []
+          let name = ''
+          let startTime = ''
+          let endTime = ''
+
+          if (type === 'bus') {
+            const startInputs = document.querySelectorAll('#startFields .start-time')
+            startInputs.forEach((input) => {
+              start.push(input.value)
+            })
+          } else if (type === 'railway') {
+            const wayInputs = document.querySelectorAll('#wayFields .way-time')
+            for (let i = 0; i < wayInputs.length; i += 2) {
+              const startTime = wayInputs[i].value
+              const endTime = wayInputs[i + 1].value
+              way.push({ start: startTime, end: endTime })
+            }
+          } else if (type === 'main') {
+            name = document.getElementById('name').value
+            startTime = document.getElementById('startTime').value
+            endTime = document.getElementById('endTime').value
+          }
 
           // 创建路径对象
-          const newWay = { type, from, to, m }
+          // const newWay = { type, from, to, m, start, way, name, startTime, endTime }
+          let newWay
+          // 添加空值检测，如果有任何一个字段为空值，则弹出警告并停止创建新路径对象
+          if (type === 'foot') {
+            if (!from || !to || !m) {
+              alert('请填写所有必填字段！')
+              return
+            }
+            newWay = { type, from, to, m }
+          } else if (type === 'bus') {
+            if (!from || !to || !m || start.some((time) => !time)) {
+              alert('请填写所有必填字段！')
+              return
+            }
+            newWay = { type, from, to, m, start }
+          } else if (type === 'railway') {
+            if (!from || !to || way.some((time) => !time.start || !time.end)) {
+              alert('请填写所有必填字段！')
+              return
+            }
+            newWay = { type, from, to, way }
+          } else if (type === 'main') {
+            if (!name || !startTime || !endTime) {
+              alert('请填写所有必填字段！')
+              return
+            }
+            newWay = { type, name, start: startTime, end: endTime }
+          }
 
           // 将新增路径添加到指定的索引位置
           ways.splice(index + 1, 0, newWay)
+          console.log(index + 1)
 
           // 重新渲染路线图
           refresh()
@@ -509,9 +905,157 @@
 
           // 关闭新增窗口
           closeModal()
-        })
-      }
+        }
 
+        // 添加表单提交事件监听器
+        addForm.addEventListener('submit', submitEventListener)
+
+        // 根据选择的类型动态显示/隐藏额外输入字段
+        const typeSelect = document.getElementById('type')
+        const additionalFields = document.getElementById('additionalFields')
+        // 在 typeSelect 元素上添加 change 事件监听器
+        typeSelect.addEventListener('change', updateUI)
+        // 页面加载时更新界面
+        updateUI()
+      }
+      // 更新界面显示和隐藏的逻辑
+      function updateUI() {
+        const typeSelect = document.getElementById('type')
+        const selectedType = typeSelect.options[typeSelect.selectedIndex].value
+
+        setFormFieldVisibility(selectedType)
+      }
+      // 添加额外字段的函数
+      function addAdditionalField(id, label, type, required, isMultiple, visible) {
+        required = false
+        if (!visible) {
+          return // 如果字段不可见，则不添加
+        }
+        const fieldDiv = document.createElement('div')
+        fieldDiv.classList.add('additional-field')
+
+        let fieldHTML = `<label for="${id}">${label}：</label>`
+        if (type === 'text' || type === 'number') {
+          fieldHTML += `<input type="${type}" id="${id}" ${required ? 'required' : ''} />`
+        } else if (type === 'select') {
+          fieldHTML += `<select id="${id}" ${required ? 'required' : ''}></select>`
+        }
+
+        if (isMultiple) {
+          const addButton = document.createElement('button')
+          addButton.textContent = '添加'
+          addButton.addEventListener('click', function () {
+            const input = document.createElement('input')
+            input.type = type
+            input.classList.add('dynamic-input')
+            input.placeholder = '请输入...'
+            fieldDiv.appendChild(input)
+          })
+          fieldHTML += ' '
+          fieldHTML += addButton.outerHTML
+        }
+
+        fieldDiv.innerHTML = fieldHTML
+        additionalFields.appendChild(fieldDiv)
+      }
+      // 添加更多发车时间输入框
+      function addStartTime() {
+        const startInputs = document.getElementById('startInputs')
+        const newInput = document.createElement('input')
+        newInput.type = 'time'
+        newInput.className = 'start-time'
+        newInput.required = true
+        startInputs.appendChild(newInput)
+      }
+      // 添加更多途径时间输入框
+      function addWayTime() {
+        const wayInputs = document.getElementById('wayInputs')
+        const newWayInputStart = document.createElement('input')
+        const newWayInputEnd = document.createElement('input')
+        newWayInputStart.type = 'time'
+        newWayInputStart.className = 'way-time'
+        newWayInputStart.required = true
+        newWayInputEnd.type = 'time'
+        newWayInputEnd.className = 'way-time'
+        newWayInputEnd.required = true
+        const span = document.createElement('span')
+        span.textContent = ' - '
+        wayInputs.appendChild(newWayInputStart)
+        wayInputs.appendChild(span)
+        wayInputs.appendChild(newWayInputEnd)
+      }
+      // 设置表单字段的可见性
+      function setFormFieldVisibility(type) {
+        const startFields = document.getElementById('startFields')
+        const wayFields = document.getElementById('wayFields')
+        const additionalFields = document.getElementById('additionalFields')
+        const mField = document.getElementById('m') // 耗时字段
+        const fromLabel = document.querySelector('label[for="from"]') // 出发地字段对应的标签
+        const toLabel = document.querySelector('label[for="to"]') // 目的地字段对应的标签
+        const mLabel = document.querySelector('label[for="m"]') // 耗时字段对应的标签
+
+        // 隐藏所有字段
+        startFields.classList.add('hidden-field')
+        wayFields.classList.add('hidden-field')
+        additionalFields.classList.add('hidden-field')
+
+        // 根据选择的类型显示相应的字段
+        if (type === 'bus') {
+          document.getElementById('from').classList.remove('hidden-field')
+          document.getElementById('to').classList.remove('hidden-field')
+          startFields.classList.remove('hidden-field') // 显示公交车的发车时间字段
+          mField.classList.remove('hidden-field') // 显示耗时字段
+          mLabel.classList.remove('hidden-field')
+          fromLabel.classList.remove('hidden-field')
+          toLabel.classList.remove('hidden-field')
+        } else if (type === 'railway') {
+          document.getElementById('from').classList.remove('hidden-field')
+          document.getElementById('to').classList.remove('hidden-field')
+          wayFields.classList.remove('hidden-field') // 显示火车的途径时间字段
+          mField.classList.add('hidden-field') // 隐藏耗时字段
+          mLabel.classList.add('hidden-field')
+        } else if (type === 'main') {
+          additionalFields.classList.remove('hidden-field') // 显示主要活动的额外字段
+          // 隐藏出发地、目的地和耗时字段
+          document.getElementById('from').classList.add('hidden-field')
+          document.getElementById('to').classList.add('hidden-field')
+          mField.classList.add('hidden-field')
+          fromLabel.classList.add('hidden-field')
+          toLabel.classList.add('hidden-field')
+          mLabel.classList.add('hidden-field')
+        } else {
+          document.getElementById('from').classList.remove('hidden-field')
+          document.getElementById('to').classList.remove('hidden-field')
+          mField.classList.remove('hidden-field') // 显示耗时字段（步行类型）
+          fromLabel.classList.remove('hidden-field')
+          toLabel.classList.remove('hidden-field')
+          mLabel.classList.remove('hidden-field')
+        }
+      }
+      // 获取额外字段的值
+      function getAdditionalFieldValues(selectedType) {
+        const additionalValues = {}
+        const additionalFieldDivs = document.querySelectorAll('.additional-field')
+        additionalFieldDivs.forEach((fieldDiv) => {
+          const fieldId = fieldDiv.querySelector('label').getAttribute('for')
+          const fieldInputs = fieldDiv.querySelectorAll('input.dynamic-input')
+          if (fieldInputs.length === 1) {
+            // 单个输入框的情况
+            const fieldValue = fieldDiv.querySelector(`#${fieldId}`).value
+            additionalValues[fieldId] = fieldValue
+          } else {
+            // 多个输入框的情况
+            const fieldValues = []
+            fieldInputs.forEach((input) => {
+              if (input.value.trim() !== '') {
+                fieldValues.push(input.value.trim())
+              }
+            })
+            additionalValues[fieldId] = fieldValues
+          }
+        })
+        return additionalValues
+      }
       // 显示新增窗口
       function openModal() {
         const modal = document.getElementById('addModal')
@@ -525,7 +1069,7 @@
       }
       function refresh() {
         render()
-        render1()
+        renderTable()
         renderWayContainer()
       }
     </script>

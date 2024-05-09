@@ -42,6 +42,7 @@ const ways = [
     to: 'Meaning Space意空间',
     m: 5,
     eat: true,
+    mustbeentime: '13:00',
   },
   { type: 'main', name: '温州·【瓯越偶像日Vol06】CrossingX意次元·Idol Live', start: '13:00', end: '17:00', eat: true },
   {
@@ -150,14 +151,11 @@ const ways = [
 //     m: 5,
 //   },
 // ]
-const startTime = '13:00'
-const endTime = '17:00'
-const festivalName = '温州·【瓯越偶像日Vol06】CrossingX意次元·Idol Live'
 const result = []
 const paths = []
 const updatedPaths = []
-let time
-timeInit()
+let minTime
+let startTime
 function render() {
   const ways1 = []
   let temp = []
@@ -189,6 +187,19 @@ function render() {
     const lastItem = way[way.length - 1]
     const hasMustBeEntime = lastItem && lastItem.mustbeentime !== undefined
     if (way[0].type === 'main') {
+      startTime = way[0].start
+      const endTime = way[0].end
+      timeInit()
+      if (j == 0) {
+        const go = subtractMinutesFromTime(time, 40)
+        result.push({
+          type: 'getup',
+          path: `起床准备`,
+          go,
+          arrive: time,
+          past: calculateTimeDifferenceAsString(go, time),
+        })
+      }
       result.push({
         type: 'foot',
         path: `入场`,
@@ -198,7 +209,7 @@ function render() {
       })
       result.push({
         type: 'main',
-        path: festivalName,
+        path: way[0].name,
         go: startTime,
         arrive: endTime,
         past: calculateTimeDifferenceAsString(startTime, endTime),
@@ -277,7 +288,6 @@ function render() {
         shouldlunch = true
         i = way.length
         result.length = 0
-        timeInit()
       }
     }
     // 对数组按时间排序
@@ -367,7 +377,7 @@ function render() {
         const arrive = subtractMinutesFromTime(findEarliestStartTimeAfterGivenTime(way[i].way, time), 0)
         const index = findEarliestStartTimeIndexAfterGivenTime(way[i].way, time)
         const go = way[i].way[index].start
-        if (isTimeBeforeSpecificTime(time, arrive))
+        if (isTimeBeforeSpecificTime(time, go))
           result.push({
             type: 'wait',
             path: `等高铁`,
@@ -431,19 +441,19 @@ function render() {
 }
 render()
 
-time = endTime
-if (isTimeBeforeSpecificTime('16:00', time)) {
-  const go = time
-  time = subtractMinutesFromTime(time, -40)
-  const arrive = time
-  result.push({
-    type: 'eat',
-    path: `吃饭`,
-    go,
-    arrive,
-    past: calculateTimeDifferenceAsString(go, arrive),
-  })
-}
+// time = endTime
+// if (isTimeBeforeSpecificTime('16:00', time)) {
+//   const go = time
+//   time = subtractMinutesFromTime(time, -40)
+//   const arrive = time
+//   result.push({
+//     type: 'eat',
+//     path: `吃饭`,
+//     go,
+//     arrive,
+//     past: calculateTimeDifferenceAsString(go, arrive),
+//   })
+// }
 const eatedTime = time
 const way2 = [
   { type: 'foot', to: '越新公寓', from: '鲁迅高级中学东门', m: '25' },
@@ -830,7 +840,7 @@ function findLatestEndTimeBeforeGivenTime(way, givenTime) {
     // 将结束时间转换为分钟数
     const endTimeMinutes = convertToMinutes(item.end)
     // 如果结束时间小于给定时间
-    if (endTimeMinutes < givenTimeMinutes) {
+    if (endTimeMinutes <= givenTimeMinutes) {
       // 将开始时间转换为分钟数
       const startTimeMinutes = convertToMinutes(item.start)
       // 如果开始时间比之前记录的最大开始时间大，则更新最大开始时间
@@ -860,7 +870,7 @@ function findLatestEndTimeIndexBeforeGivenTime(way, givenTime) {
     // 将结束时间转换为分钟数
     const endTimeMinutes = convertToMinutes(item.end)
     // 如果结束时间小于给定时间
-    if (endTimeMinutes < givenTimeMinutes) {
+    if (endTimeMinutes <= givenTimeMinutes) {
       // 将开始时间转换为分钟数
       const startTimeMinutes = convertToMinutes(item.start)
       // 如果开始时间比之前记录的最大开始时间大，则更新最大开始时间及其下标
@@ -890,7 +900,7 @@ function findEarliestStartTimeAfterGivenTime(way, givenTime) {
     // 将开始时间转换为分钟数
     const startTimeMinutes = convertToMinutes(item.start)
     // 如果开始时间大于给定时间
-    if (startTimeMinutes > givenTimeMinutes) {
+    if (startTimeMinutes >= givenTimeMinutes) {
       // 将结束时间转换为分钟数
       const endTimeMinutes = convertToMinutes(item.end)
       // 如果结束时间比之前记录的最小结束时间小，则更新最小结束时间
@@ -920,7 +930,7 @@ function findEarliestStartTimeIndexAfterGivenTime(way, givenTime) {
     // 将开始时间转换为分钟数
     const startTimeMinutes = convertToMinutes(item.start)
     // 如果开始时间大于给定时间
-    if (startTimeMinutes > givenTimeMinutes) {
+    if (startTimeMinutes >= givenTimeMinutes) {
       // 将结束时间转换为分钟数
       const endTimeMinutes = convertToMinutes(item.end)
       // 如果结束时间比之前记录的最小结束时间小，则更新最小结束时间及其索引

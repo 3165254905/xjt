@@ -420,7 +420,7 @@
 
         // 如果找到对应的项，则获取发车时间或途径时间
         if (item) {
-          const startTime = item.start
+          const startTime = item.start && item.start.join(', ')
           const wayTimes = item.way && item.way.map((time) => `${time.start} - ${time.end}`).join(', ')
 
           // 显示所有的发车时间或途径时间

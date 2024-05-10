@@ -350,6 +350,70 @@
         </form>
       </div>
     </div>
+    <!-- 编辑窗口 -->
+    <div id="editModal" class="modal hidden">
+      <div class="modal-content">
+        <span class="close" onclick="closeEditModal()">&times;</span>
+        <h2>编辑路径</h2>
+        <form id="editForm">
+          <label for="editType">类型：</label>
+          <select id="editType" onchange="updateEditUI()">
+            <option value="foot">步行</option>
+            <option value="bus">公交车</option>
+            <option value="railway">火车</option>
+            <option value="main">主要活动</option>
+            <!-- 添加更多类型 -->
+          </select>
+          <br />
+          <div id="editFromField" class="form-field">
+            <label for="editFrom">出发地：</label>
+            <input type="text" id="editFrom" />
+          </div>
+          <div id="editToField" class="form-field">
+            <label for="editTo">目的地：</label>
+            <input type="text" id="editTo" />
+          </div>
+          <div id="editMField" class="form-field">
+            <label for="editM">耗时（分钟）：</label>
+            <input type="number" id="editM" />
+          </div>
+          <div id="editStartFields" class="hidden-field">
+            <!-- 公交车的发车时间字段 -->
+            <label>发车时间：</label>
+            <div id="editStartInputs">
+              <!-- 第一个发车时间输入框 -->
+              <input type="time" class="edit-start-time" />
+            </div>
+            <button type="button" onclick="addEditStartTime()">添加更多</button>
+          </div>
+          <div id="editWayFields" class="hidden-field">
+            <!-- 火车的途径时间字段 -->
+            <label>途径时间：</label>
+            <div id="editWayInputs">
+              <!-- 第一个途径时间输入框 -->
+              <input type="time" class="edit-way-time" />
+              <span> - </span>
+              <input type="time" class="edit-way-time" />
+            </div>
+            <button type="button" onclick="addEditWayTime()">添加更多</button>
+          </div>
+          <div id="editAdditionalFields" class="hidden-field">
+            <!-- 主要活动的额外字段 -->
+            <label for="editName">名称：</label>
+            <input type="text" id="editName" />
+            <br />
+            <label for="editStartTime">开始时间：</label>
+            <input type="time" id="editStartTime" />
+            <br />
+            <label for="editEndTime">结束时间：</label>
+            <input type="time" id="editEndTime" />
+            <br />
+          </div>
+          <input type="submit" value="保存" />
+        </form>
+      </div>
+    </div>
+
     <script type="text/javascript" src="./xjt.js"></script>
     <script>
       const tableBody = document.getElementById('tableBody')
@@ -553,102 +617,97 @@
           console.log(`Way ${index} must be entime updated: ${value}`)
           refresh() // 更新界面
         }
-        // 编辑路线
+        // 编辑路径
         window.editWay = function (index) {
-          // 获取路线信息
+          // 获取要编辑的路径对象
           const way = ways[index]
 
-          // 创建编辑窗口
-          const editModal = document.getElementById('editModal')
-          const modalContent = editModal.querySelector('.modal-content')
+          // 将路径对象的数据填充到编辑窗口的表单中
+          document.getElementById('editType').value = way.type
+          document.getElementById('editFrom').value = way.from
+          document.getElementById('editTo').value = way.to
+          document.getElementById('editM').value = way.m || ''
+          // 根据类型显示对应的字段
+          updateEditUI() // 更新编辑窗口显示的字段
 
-          // 清空编辑窗口内容
-          modalContent.innerHTML = ''
-
-          // 创建编辑表单
-          const editForm = document.createElement('form')
-          editForm.id = 'editForm'
-
-          // 添加关闭按钮
-          const closeButton = document.createElement('span')
-          closeButton.classList.add('close')
-          closeButton.innerHTML = '&times;'
-          closeButton.onclick = closeModal
-          editForm.appendChild(closeButton)
-
-          // 添加标题
-          const title = document.createElement('h2')
-          title.textContent = '编辑路径'
-          editForm.appendChild(title)
-
-          // 添加类型选择
-          const typeLabel = document.createElement('label')
-          typeLabel.setAttribute('for', 'editType')
-          typeLabel.textContent = '类型：'
-          editForm.appendChild(typeLabel)
-
-          const typeSelect = document.createElement('select')
-          typeSelect.id = 'editType'
-          typeSelect.onchange = updateUI
-          const types = ['foot', 'bus', 'railway', 'main'] // 添加更多类型
-          types.forEach((type) => {
-            const option = document.createElement('option')
-            option.value = type
-            option.textContent = type.toUpperCase() // 将类型转换为大写显示
-            typeSelect.appendChild(option)
-          })
-          editForm.appendChild(typeSelect)
-
-          // 根据路线类型不同，添加不同的表单项
-          if (way.type !== 'main') {
-            editForm.innerHTML += `
-            <div id="editFromField" class="form-field">
-                <label for="editFrom">出发地：</label>
-                <input type="text" id="editFrom" value="${way.from}">
-            </div>
-            <div id="editToField" class="form-field">
-                <label for="editTo">目的地：</label>
-                <input type="text" id="editTo" value="${way.to}">
-            </div>
-            <div id="editMField" class="form-field">
-                <label for="editM">耗时（分钟）：</label>
-                <input type="number" id="editM" value="${way.m}">
-            </div>
-        `
-          } else {
-            editForm.innerHTML += `
-            <div id="editNameField" class="form-field">
-                <label for="editName">名称：</label>
-                <input type="text" id="editName" value="${way.name}">
-            </div>
-            <div id="editStartTimeField" class="form-field">
-                <label for="editStartTime">开始时间：</label>
-                <input type="time" id="editStartTime" value="${way.start}">
-            </div>
-            <div id="editEndTimeField" class="form-field">
-                <label for="editEndTime">结束时间：</label>
-                <input type="time" id="editEndTime" value="${way.end}">
-            </div>
-        `
+          // 如果是公交车或火车类型，填入发车时间或途径时间
+          if (way.type === 'bus') {
+            fillEditStartTime(way.start)
+          } else if (way.type === 'railway') {
+            fillEditWayTime(way.way)
+          } else if (way.type === 'main') {
+            document.getElementById('editName').value = way.name || ''
+            document.getElementById('editStartTime').value = way.start || ''
+            document.getElementById('editEndTime').value = way.end || ''
           }
 
-          // 添加提交按钮
-          const submitButton = document.createElement('input')
-          submitButton.type = 'submit'
-          submitButton.value = '保存'
-          editForm.appendChild(submitButton)
-
-          // 监听表单提交事件
-          editForm.addEventListener('submit', function (event) {
-            event.preventDefault() // 阻止表单默认提交行为
-            saveWayChanges(index)
-          })
-
-          // 将编辑表单添加到编辑窗口中
-          modalContent.appendChild(editForm)
-
           // 显示编辑窗口
-          openModal()
+          document.getElementById('editModal').classList.remove('hidden')
+        }
+        // 辅助函数：将时间格式化为 "hh:mm" 格式
+        function formatTime(hours, minutes) {
+          // 如果小时或分钟小于10，则在其前面添加0以确保两位数字格式
+          const formattedHours = String(hours).padStart(2, '0')
+          const formattedMinutes = String(minutes).padStart(2, '0')
+          return `${formattedHours}:${formattedMinutes}`
+        }
+
+        // 填充编辑窗口中的发车时间
+        function fillEditStartTime(startTimes) {
+          const startInputsContainer = document.getElementById('editStartInputs')
+          startInputsContainer.innerHTML = '' // 清空现有的输入框
+
+          startTimes.forEach((time, index) => {
+            const input = document.createElement('input')
+            input.type = 'time'
+            input.classList.add('edit-start-time')
+
+            // 解析时间字符串并格式化为 "hh:mm" 格式
+            const [hours, minutes] = time.split(':')
+            const formattedTime = formatTime(hours, minutes)
+            input.value = formattedTime // 设置时间输入框的值
+
+            startInputsContainer.appendChild(input)
+
+            // 添加删除按钮
+            addDeleteStartTimeButton(startInputsContainer, index)
+          })
+        }
+
+        // 填充编辑窗口中的途径时间
+        function fillEditWayTime(wayTimes) {
+          const wayInputsContainer = document.getElementById('editWayInputs')
+          wayInputsContainer.innerHTML = '' // 清空现有的输入框
+
+          wayTimes.forEach((time, index) => {
+            const startInput = document.createElement('input')
+            startInput.type = 'time'
+            startInput.classList.add('edit-way-time')
+
+            // 解析时间字符串并格式化为 "hh:mm" 格式
+            const [startHours, startMinutes] = time.start.split(':')
+            const formattedStartTime = formatTime(startHours, startMinutes)
+            startInput.value = formattedStartTime // 设置起始时间输入框的值
+
+            const span = document.createElement('span')
+            span.textContent = ' - '
+
+            const endInput = document.createElement('input')
+            endInput.type = 'time'
+            endInput.classList.add('edit-way-time')
+
+            // 解析时间字符串并格式化为 "hh:mm" 格式
+            const [endHours, endMinutes] = time.end.split(':')
+            const formattedEndTime = formatTime(endHours, endMinutes)
+            endInput.value = formattedEndTime // 设置结束时间输入框的值
+
+            wayInputsContainer.appendChild(startInput)
+            wayInputsContainer.appendChild(span)
+            wayInputsContainer.appendChild(endInput)
+
+            // 添加删除按钮
+            addDeleteWayTimeButton(wayInputsContainer, index)
+          })
         }
 
         // 保存路线修改
@@ -667,7 +726,28 @@
           renderWayContainer()
         }
       }
+      // 更新编辑窗口显示的字段
+      function updateEditUI() {
+        const selectedType = document.getElementById('editType').value
 
+        // 根据选择的类型显示或隐藏对应的字段
+        document.getElementById('editStartFields').classList.add('hidden-field')
+        document.getElementById('editWayFields').classList.add('hidden-field')
+        document.getElementById('editAdditionalFields').classList.add('hidden-field')
+
+        if (selectedType === 'bus') {
+          document.getElementById('editStartFields').classList.remove('hidden-field')
+        } else if (selectedType === 'railway') {
+          document.getElementById('editWayFields').classList.remove('hidden-field')
+        } else if (selectedType === 'main') {
+          document.getElementById('editAdditionalFields').classList.remove('hidden-field')
+        }
+      }
+      // 关闭编辑窗口
+      function closeEditModal() {
+        const editModal = document.getElementById('editModal')
+        editModal.classList.add('hidden')
+      }
       renderWayContainer()
       // 获取侧边栏、菜单按钮、表格视图和修改界面的引用
       const sidebar = document.getElementById('sidebar')
@@ -682,6 +762,7 @@
       // 添加事件监听器以显示/隐藏侧边栏
       menuButton.addEventListener('click', () => {
         const modal = document.getElementById('addModal')
+        const editModal = document.getElementById('editModal')
         // 如果侧边栏是隐藏的，则显示；否则隐藏
         if (sidebar.style.left === '-200px') {
           sidebar.style.left = '0'
@@ -691,6 +772,8 @@
             formContent.style.marginLeft = '200px'
             modal.style.marginLeft = '200px'
             modal.style.width = 'calc(100vw - 200px)'
+            editModal.style.marginLeft = '200px'
+            editModal.style.width = 'calc(100vw - 200px)'
           }
         } else {
           sidebar.style.left = '-200px'
@@ -699,6 +782,8 @@
           formContent.style.marginLeft = '0'
           modal.style.marginLeft = '0'
           modal.style.width = '100vw'
+          editModal.style.marginLeft = '0'
+          editModal.style.width = '100vw'
         }
       })
 
@@ -1055,6 +1140,153 @@
           }
         })
         return additionalValues
+      }
+      // 添加发车时间
+      function addEditStartTime() {
+        const startInputs = document.getElementById('editStartInputs')
+        const input = document.createElement('input')
+        input.type = 'time'
+        input.className = 'edit-start-time'
+        startInputs.appendChild(input)
+
+        // 添加删除按钮
+        addDeleteStartTimeButton(input.parentElement, startInputs.children.length - 1)
+      }
+
+      // 添加途径时间
+      function addEditWayTime() {
+        const wayInputs = document.getElementById('editWayInputs')
+        const startInput = document.createElement('input')
+        startInput.type = 'time'
+        startInput.className = 'edit-way-time'
+        wayInputs.appendChild(startInput)
+
+        const separator = document.createElement('span')
+        separator.textContent = ' - '
+        wayInputs.appendChild(separator)
+
+        const endInput = document.createElement('input')
+        endInput.type = 'time'
+        endInput.className = 'edit-way-time'
+        wayInputs.appendChild(endInput)
+
+        // 添加删除按钮
+        addDeleteWayTimeButton(startInput.parentElement, wayInputs.children.length / 3 - 1)
+      }
+      // 删除指定索引的发车时间
+      function deleteStartTime(index) {
+        const startInputs = document.querySelectorAll('.edit-start-time')
+        if (startInputs.length > 1) {
+          const startInput = startInputs[index]
+          const deleteButton = startInput.nextElementSibling // 获取下一个兄弟节点（即删除按钮）
+          startInput.parentNode.removeChild(startInput) // 删除时间输入框
+          deleteButton.parentNode.removeChild(deleteButton) // 删除对应的删除按钮
+        }
+      }
+
+      // 删除指定索引的途径时间
+      function deleteWayTime(index) {
+        const wayInputs = document.querySelectorAll('.edit-way-time')
+        if (wayInputs.length > 1) {
+          const startIndex = index * 2 // 每个途径时间有两个输入框
+          const startInput = wayInputs[startIndex]
+          const deleteButton = startInput.nextElementSibling // 获取下一个兄弟节点（即删除按钮）
+          startInput.parentNode.removeChild(startInput) // 删除起始时间输入框
+          deleteButton.parentNode.removeChild(deleteButton) // 删除对应的删除按钮
+
+          const endIndex = startIndex + 1
+          const endInput = wayInputs[endIndex]
+          const waySpan = endInput.nextElementSibling // 获取下一个兄弟节点（即间隔符号）
+          endInput.parentNode.removeChild(endInput) // 删除结束时间输入框
+          waySpan.parentNode.removeChild(waySpan) // 删除间隔符号
+        }
+      }
+      // 添加删除按钮
+      function addDeleteButton(parentNode, onClickHandler) {
+        const deleteButton = document.createElement('button')
+        deleteButton.textContent = '删除'
+        deleteButton.type = 'button'
+        deleteButton.addEventListener('click', onClickHandler)
+        parentNode.appendChild(deleteButton)
+      }
+
+      // 添加删除发车时间按钮
+      function addDeleteStartTimeButton(parentElement, index) {
+        const deleteButton = document.createElement('button')
+        deleteButton.textContent = '删除'
+        deleteButton.type = 'button'
+        deleteButton.classList.add('delete-button')
+        deleteButton.onclick = function () {
+          deleteStartTime(index)
+          generateDeleteButtons() // 在删除后重新生成所有删除按钮
+        }
+        parentElement.appendChild(deleteButton)
+      }
+
+      // 添加删除途径时间按钮
+      function addDeleteWayTimeButton(parentElement, index) {
+        const deleteButton = document.createElement('button')
+        deleteButton.textContent = '删除'
+        deleteButton.type = 'button'
+        deleteButton.classList.add('delete-button')
+        deleteButton.onclick = function () {
+          deleteWayTime(index)
+          generateDeleteButtons() // 在删除后重新生成所有删除按钮
+        }
+        parentElement.appendChild(deleteButton)
+      }
+      // 生成所有删除按钮
+      function generateDeleteButtons() {
+        const startInputs = document.querySelectorAll('.edit-start-time')
+        startInputs.forEach((input, index) => {
+          // 清除当前输入框后面的删除按钮
+          const currentDeleteButton = input.nextElementSibling
+          if (currentDeleteButton && currentDeleteButton.classList.contains('delete-button')) {
+            currentDeleteButton.remove()
+          }
+
+          const deleteButton = document.createElement('button')
+          deleteButton.textContent = '删除'
+          deleteButton.type = 'button'
+          deleteButton.classList.add('delete-button')
+          deleteButton.onclick = function () {
+            deleteStartTime(index)
+            generateDeleteButtons() // 在删除后重新生成所有删除按钮
+          }
+          input.parentNode.appendChild(deleteButton) // 添加删除按钮到当前输入框的父元素
+        })
+
+        const wayInputs = document.querySelectorAll('.edit-way-time')
+        wayInputs.forEach((input, index) => {
+          // 清除当前输入框后面的删除按钮
+          const currentDeleteButton = input.nextElementSibling
+          if (currentDeleteButton && currentDeleteButton.classList.contains('delete-button')) {
+            currentDeleteButton.remove()
+          }
+
+          const deleteButton = document.createElement('button')
+          deleteButton.textContent = '删除'
+          deleteButton.type = 'button'
+          deleteButton.classList.add('delete-button')
+          deleteButton.onclick = function () {
+            deleteWayTime(Math.floor(index / 2)) // 因为途径时间有两个输入框，所以除以2
+            generateDeleteButtons() // 在删除后重新生成所有删除按钮
+          }
+          input.parentNode.appendChild(deleteButton) // 添加删除按钮到当前输入框的父元素
+        })
+      }
+
+      // 删除发车时间
+      function deleteEditStartTime(index) {
+        const startInputs = document.getElementById('editStartInputs')
+        startInputs.children[index].remove()
+      }
+      // 删除途径时间
+      function deleteEditWayTime(index) {
+        const wayInputs = document.getElementById('editWayInputs')
+        wayInputs.children[index * 3].remove() // 删除起始时间
+        wayInputs.children[index * 3].remove() // 删除分隔符
+        wayInputs.children[index * 3].remove() // 删除结束时间
       }
       // 显示新增窗口
       function openModal() {

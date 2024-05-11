@@ -391,9 +391,12 @@
             <label>途径时间：</label>
             <div id="editWayInputs">
               <!-- 第一个途径时间输入框 -->
-              <input type="time" class="edit-way-time" />
-              <span> - </span>
-              <input type="time" class="edit-way-time" />
+              <div class="way-input-container">
+                <input type="time" class="edit-way-time" />
+                <span> - </span>
+                <input type="time" class="edit-way-time" />
+                <button type="button" class="delete-button" onclick="deleteWayTime(0)">删除</button>
+              </div>
             </div>
             <button type="button" onclick="addEditWayTime()">添加更多</button>
           </div>
@@ -1150,28 +1153,41 @@
         startInputs.appendChild(input)
 
         // 添加删除按钮
-        addDeleteStartTimeButton(input.parentElement, startInputs.children.length - 1)
+        addDeleteStartTimeButton(input.parentElement, (startInputs.children.length - 1) / 2)
       }
 
       // 添加途径时间
       function addEditWayTime() {
         const wayInputs = document.getElementById('editWayInputs')
+        const wayInputContainer = document.createElement('div')
+        wayInputContainer.className = 'way-input-container'
+
         const startInput = document.createElement('input')
         startInput.type = 'time'
         startInput.className = 'edit-way-time'
-        wayInputs.appendChild(startInput)
+        wayInputContainer.appendChild(startInput)
 
         const separator = document.createElement('span')
         separator.textContent = ' - '
-        wayInputs.appendChild(separator)
+        wayInputContainer.appendChild(separator)
 
         const endInput = document.createElement('input')
         endInput.type = 'time'
         endInput.className = 'edit-way-time'
-        wayInputs.appendChild(endInput)
+        wayInputContainer.appendChild(endInput)
 
         // 添加删除按钮
-        addDeleteWayTimeButton(startInput.parentElement, wayInputs.children.length / 3 - 1)
+        const deleteButton = document.createElement('button')
+        deleteButton.textContent = '删除'
+        deleteButton.type = 'button'
+        deleteButton.className = 'delete-button'
+        deleteButton.onclick = function () {
+          deleteWayTime(Math.floor(wayInputs.children.length / 4))
+          generateDeleteButtons() // 在删除后重新生成所有删除按钮
+        }
+        wayInputContainer.appendChild(deleteButton)
+
+        wayInputs.appendChild(wayInputContainer)
       }
       // 删除指定索引的发车时间
       function deleteStartTime(index) {
@@ -1238,42 +1254,35 @@
       // 生成所有删除按钮
       function generateDeleteButtons() {
         const startInputs = document.querySelectorAll('.edit-start-time')
-        startInputs.forEach((input, index) => {
-          // 清除当前输入框后面的删除按钮
-          const currentDeleteButton = input.nextElementSibling
-          if (currentDeleteButton && currentDeleteButton.classList.contains('delete-button')) {
-            currentDeleteButton.remove()
-          }
-
-          const deleteButton = document.createElement('button')
-          deleteButton.textContent = '删除'
-          deleteButton.type = 'button'
-          deleteButton.classList.add('delete-button')
-          deleteButton.onclick = function () {
-            deleteStartTime(index)
-            generateDeleteButtons() // 在删除后重新生成所有删除按钮
-          }
-          input.parentNode.appendChild(deleteButton) // 添加删除按钮到当前输入框的父元素
-        })
-
         const wayInputs = document.querySelectorAll('.edit-way-time')
-        wayInputs.forEach((input, index) => {
-          // 清除当前输入框后面的删除按钮
-          const currentDeleteButton = input.nextElementSibling
-          if (currentDeleteButton && currentDeleteButton.classList.contains('delete-button')) {
-            currentDeleteButton.remove()
-          }
 
-          const deleteButton = document.createElement('button')
-          deleteButton.textContent = '删除'
-          deleteButton.type = 'button'
-          deleteButton.classList.add('delete-button')
-          deleteButton.onclick = function () {
-            deleteWayTime(Math.floor(index / 2)) // 因为途径时间有两个输入框，所以除以2
-            generateDeleteButtons() // 在删除后重新生成所有删除按钮
+        // 清除所有已有的删除按钮
+        document.querySelectorAll('.delete-button').forEach((button) => button.remove())
+
+        // 生成删除按钮并插入
+        for (let i = 0; i < Math.max(startInputs.length, wayInputs.length); i++) {
+          if (startInputs[i]) {
+            const deleteButton = createDeleteButton('deleteStartTime', i)
+            startInputs[i].parentNode.insertBefore(deleteButton, startInputs[i].nextElementSibling)
           }
-          input.parentNode.appendChild(deleteButton) // 添加删除按钮到当前输入框的父元素
-        })
+          if (wayInputs[i] && i % 2 === 1) {
+            const deleteButton = createDeleteButton('deleteWayTime', Math.floor(i / 2))
+            wayInputs[i].parentNode.insertBefore(deleteButton, wayInputs[i].nextElementSibling)
+          }
+        }
+      }
+
+      // 创建删除按钮
+      function createDeleteButton(handlerName, index) {
+        const deleteButton = document.createElement('button')
+        deleteButton.textContent = '删除'
+        deleteButton.type = 'button'
+        deleteButton.classList.add('delete-button')
+        deleteButton.onclick = function () {
+          window[handlerName](index)
+          generateDeleteButtons() // 在删除后重新生成所有删除按钮
+        }
+        return deleteButton
       }
 
       // 删除发车时间

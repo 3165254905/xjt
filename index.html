@@ -234,7 +234,8 @@
         background-color: #f0f0f0; /* 淡灰色 */
       }
 
-      .edit-button {
+      .edit-button,
+      .delete-button {
         background-color: #4caf50; /* 绿色 */
         border: none;
         color: white;
@@ -246,11 +247,20 @@
         margin: 4px 2px;
         transition-duration: 0.4s;
         cursor: pointer;
+        border-radius: 4px; /* 添加圆角 */
       }
 
-      .edit-button:hover {
+      .edit-button:hover,
+      .delete-button:hover {
         background-color: #45a049; /* 深绿色 */
-        color: white;
+      }
+
+      .delete-button {
+        background-color: #f44336; /* 红色 */
+      }
+
+      .delete-button:hover {
+        background-color: #d32f2f; /* 深红色 */
       }
     </style>
   </head>
@@ -579,6 +589,10 @@
           detailsHTML += `
             <button class="edit-button" onclick="editWay(${i})">修改</button>
         `
+          // 添加删除按钮
+          detailsHTML += `
+        <button class="delete-button" onclick="deleteWay(${i})">删除</button>
+    `
           wayElement.innerHTML = detailsHTML
           wayContainer.appendChild(wayElement)
 
@@ -644,6 +658,8 @@
             document.getElementById('editEndTime').value = way.end || ''
           }
 
+          editPath(index) // 将编辑操作应用到当前路径
+          console.log(`editPath ${index}`)
           // 显示编辑窗口
           document.getElementById('editModal').classList.remove('hidden')
         }
@@ -1042,7 +1058,7 @@
         const newInput = document.createElement('input')
         newInput.type = 'time'
         newInput.className = 'start-time'
-        newInput.required = true
+        // newInput.required = true
         startInputs.appendChild(newInput)
       }
       // 添加更多途径时间输入框
@@ -1052,10 +1068,10 @@
         const newWayInputEnd = document.createElement('input')
         newWayInputStart.type = 'time'
         newWayInputStart.className = 'way-time'
-        newWayInputStart.required = true
+        // newWayInputStart.required = true
         newWayInputEnd.type = 'time'
         newWayInputEnd.className = 'way-time'
-        newWayInputEnd.required = true
+        // newWayInputEnd.required = true
         const span = document.createElement('span')
         span.textContent = ' - '
         wayInputs.appendChild(newWayInputStart)
@@ -1196,6 +1212,121 @@
           deleteButton.parentNode.removeChild(deleteButton) // 删除对应的删除按钮
         }
       }
+      function editPath(index) {
+        // 显示编辑窗口
+        // openEditModal()
+
+        // 获取表单元素
+        const editForm = document.getElementById('editForm')
+
+        // 移除之前的事件监听器
+        if (submitEventListener) {
+          editForm.removeEventListener('submit', submitEventListener)
+        }
+
+        // 修改提交事件处理函数以适应新的字段结构
+        submitEventListener = function (event) {
+          event.preventDefault()
+
+          // 获取表单数据
+          const type = document.getElementById('editType').value
+          const from = type !== 'main' ? document.getElementById('editFrom').value : ''
+          const to = type !== 'main' ? document.getElementById('editTo').value : ''
+          const m = type !== 'railway' && type !== 'main' ? document.getElementById('editM').value : ''
+          let start = []
+          let way = []
+          let name = ''
+          let startTime = ''
+          let endTime = ''
+
+          // 获取其他字段的值，根据需要添加更多的字段处理
+
+          // 将索引作为参数传递给保存函数
+          savePath(index)
+        }
+
+        // 添加表单提交事件监听器
+        editForm.addEventListener('submit', submitEventListener)
+
+        // 根据选择的类型动态显示/隐藏额外输入字段
+        const editTypeSelect = document.getElementById('editType')
+        const editAdditionalFields = document.getElementById('editAdditionalFields')
+        // 在 typeSelect 元素上添加 change 事件监听器
+        editTypeSelect.addEventListener('change', updateEditUI)
+        // 页面加载时更新界面
+        updateEditUI()
+      }
+      function savePath(index) {
+        // 阻止表单默认提交行为
+        event.preventDefault()
+
+        // 获取编辑表单中的数据
+        const type = document.getElementById('editType').value
+        const from = document.getElementById('editFrom').value
+        const to = document.getElementById('editTo').value
+        const m = document.getElementById('editM').value
+        let start = []
+        let way = []
+        let name = ''
+        let startTime = ''
+        let endTime = ''
+
+        // 根据不同类型获取不同字段的值
+        if (type === 'bus') {
+          const startInputs = document.querySelectorAll('#editStartFields .edit-start-time')
+          startInputs.forEach((input) => {
+            start.push(input.value)
+          })
+        } else if (type === 'railway') {
+          const wayInputs = document.querySelectorAll('#editWayFields .edit-way-time')
+          for (let i = 0; i < wayInputs.length; i += 2) {
+            const startTime = wayInputs[i].value
+            const endTime = wayInputs[i + 1].value
+            way.push({ start: startTime, end: endTime })
+          }
+        } else if (type === 'main') {
+          name = document.getElementById('editName').value
+          startTime = document.getElementById('editStartTime').value
+          endTime = document.getElementById('editEndTime').value
+        }
+
+        // 创建路径对象
+        let newWay
+        if (type === 'foot') {
+          if (!from || !to || !m) {
+            alert('请填写所有必填字段！')
+            return
+          }
+          newWay = { type, from, to, m }
+        } else if (type === 'bus') {
+          if (!from || !to || !m || start.some((time) => !time)) {
+            alert('请填写所有必填字段！')
+            return
+          }
+          newWay = { type, from, to, m, start }
+        } else if (type === 'railway') {
+          if (!from || !to || way.some((time) => !time.start || !time.end)) {
+            alert('请填写所有必填字段！')
+            return
+          }
+          newWay = { type, from, to, way }
+        } else if (type === 'main') {
+          if (!name || !startTime || !endTime) {
+            alert('请填写所有必填字段！')
+            return
+          }
+          newWay = { type, name, start: startTime, end: endTime }
+        }
+
+        // 将编辑后的路径对象插入到指定的索引位置
+        ways.splice(index, 1, newWay)
+
+        // 重新渲染路线图
+        refresh()
+
+        // 关闭编辑窗口
+        closeEditModal()
+      }
 
       // 删除指定索引的途径时间
       function deleteWayTime(index) {
@@ -1247,6 +1378,16 @@
           generateDeleteButtons() // 在删除后重新生成所有删除按钮
         }
         parentElement.appendChild(deleteButton)
+      }
+      function deleteWay(index) {
+        // 确认是否删除该路线
+        const confirmDelete = confirm('确定要删除该路线吗？')
+        if (confirmDelete) {
+          // 从 ways 数组中删除指定索引的路线
+          ways.splice(index, 1)
+          // 重新渲染路线图
+          refresh()
+        }
       }
       // 生成所有删除按钮
       function generateDeleteButtons() {

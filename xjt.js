@@ -1,4 +1,4 @@
-const ways = [
+let ways = [
   { type: 'foot', from: '越新公寓', to: '景泰嘉苑', m: '10' },
   {
     type: 'bus',
@@ -103,7 +103,17 @@ const ways = [
   },
   { type: 'foot', to: '越新公寓', from: '鲁迅高级中学东门', m: '25', mustbeentime: '23:00' },
 ]
-
+let config = {
+  name: { val: '越新公寓 - 瓯越偶像日', meaning: '保存文件名称' },
+  wakeUpPreparationTime: { val: 40, meaning: '起床准备时间(m)' },
+  preventMissingHighSpeedRailTime: { val: 15, meaning: '防止错过高铁时间(m)' },
+  mealTime: { val: 40, meaning: '吃饭时间(m)' },
+}
+const updateLog = [
+  { date: '2024-05-20', content: '新增了数据管理界面，支持导入导出数据功能。' },
+  { date: '2024-05-22', content: '修复了导入数据时可能出现的错误。' },
+  { date: '2024-05-25', content: '优化了界面美观度，增加了更新日志界面。' },
+]
 // console.log(ways1)
 
 // const way = [
@@ -191,7 +201,7 @@ function render() {
       const endTime = way[0].end
       timeInit()
       if (j == 0) {
-        const go = subtractMinutesFromTime(time, 40)
+        const go = subtractMinutesFromTime(time, config.wakeUpPreparationTime.val)
         result.push({
           type: 'getup',
           path: `起床准备`,
@@ -218,7 +228,7 @@ function render() {
       if (way[0].eat === true) {
         shouldlunch = false
         const go = time
-        time = subtractMinutesFromTime(time, -40)
+        time = subtractMinutesFromTime(time, -config.mealTime.val)
         const arrive = time
         result.push({
           type: 'eat',
@@ -237,7 +247,7 @@ function render() {
       if (haslunch === true) {
         haslunch = '吃过啦'
         const arrive = time
-        time = subtractMinutesFromTime(time, 40)
+        time = subtractMinutesFromTime(time, config.mealTime.val)
         const go = time
         result.push({ path: `吃饭`, go, arrive, past: calculateTimeDifferenceAsString(go, arrive) })
       }
@@ -306,7 +316,7 @@ function render() {
     })
     result.length = 0
     if (j == 0) {
-      const go = subtractMinutesFromTime(time, 40)
+      const go = subtractMinutesFromTime(time, config.wakeUpPreparationTime.val)
       result.push({
         type: 'getup',
         path: `起床准备`,
@@ -319,7 +329,7 @@ function render() {
     if (shouldlunch && isTimeBeforeSpecificTime('12:00', time)) {
       shouldlunch = false
       const go = time
-      time = subtractMinutesFromTime(time, -40)
+      time = subtractMinutesFromTime(time, -config.mealTime.val)
       const arrive = time
       result.push({
         type: 'eat',
@@ -366,7 +376,7 @@ function render() {
       if (way[i].type === 'railway') {
         const startList = way[i].way.map((it) => it.start)
         const lastTime = time
-        time = subtractMinutesFromTime(time, -15)
+        time = subtractMinutesFromTime(time, -config.preventMissingHighSpeedRailTime.val)
         result.push({
           type: 'wait',
           path: `防止错过高铁`,
@@ -404,7 +414,7 @@ function render() {
     if (shouldlunch && isTimeBeforeSpecificTime(time, '12:00')) {
       shouldlunch = false
       const go = time
-      time = subtractMinutesFromTime(time, -40)
+      time = subtractMinutesFromTime(time, -config.mealTime.val)
       const arrive = time
       result.push({
         type: 'eat',

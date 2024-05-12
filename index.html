@@ -733,18 +733,8 @@
       function updateEditUI() {
         const selectedType = document.getElementById('editType').value
 
-        // 根据选择的类型显示或隐藏对应的字段
-        document.getElementById('editStartFields').classList.add('hidden-field')
-        document.getElementById('editWayFields').classList.add('hidden-field')
-        document.getElementById('editAdditionalFields').classList.add('hidden-field')
-
-        if (selectedType === 'bus') {
-          document.getElementById('editStartFields').classList.remove('hidden-field')
-        } else if (selectedType === 'railway') {
-          document.getElementById('editWayFields').classList.remove('hidden-field')
-        } else if (selectedType === 'main') {
-          document.getElementById('editAdditionalFields').classList.remove('hidden-field')
-        }
+        // 调用 setFormFieldVisibility() 设置表单字段的可见性
+        setFormFieldVisibility(selectedType, 'edit')
       }
       // 关闭编辑窗口
       function closeEditModal() {
@@ -1073,14 +1063,18 @@
         wayInputs.appendChild(newWayInputEnd)
       }
       // 设置表单字段的可见性
-      function setFormFieldVisibility(type) {
-        const startFields = document.getElementById('startFields')
-        const wayFields = document.getElementById('wayFields')
-        const additionalFields = document.getElementById('additionalFields')
-        const mField = document.getElementById('m') // 耗时字段
-        const fromLabel = document.querySelector('label[for="from"]') // 出发地字段对应的标签
-        const toLabel = document.querySelector('label[for="to"]') // 目的地字段对应的标签
-        const mLabel = document.querySelector('label[for="m"]') // 耗时字段对应的标签
+      function setFormFieldVisibility(type, formId) {
+        const startFields = document.getElementById(formId !== undefined ? formId + 'StartFields' : 'startFields')
+        const wayFields = document.getElementById(formId !== undefined ? formId + 'WayFields' : 'wayFields')
+        const additionalFields = document.getElementById(
+          formId !== undefined ? formId + 'AdditionalFields' : 'additionalFields',
+        )
+        const mField = document.getElementById(formId !== undefined ? formId + 'M' : 'm') // 耗时字段
+        const fromLabel = document.querySelector(
+          'label[for="' + (formId !== undefined ? formId + 'From' : 'from') + '"]',
+        ) // 出发地字段对应的标签
+        const toLabel = document.querySelector('label[for="' + (formId !== undefined ? formId + 'To' : 'to') + '"]') // 目的地字段对应的标签
+        const mLabel = document.querySelector('label[for="' + (formId !== undefined ? formId + 'M' : 'm') + '"]') // 耗时字段对应的标签
 
         // 隐藏所有字段
         startFields.classList.add('hidden-field')
@@ -1089,37 +1083,40 @@
 
         // 根据选择的类型显示相应的字段
         if (type === 'bus') {
-          document.getElementById('from').classList.remove('hidden-field')
-          document.getElementById('to').classList.remove('hidden-field')
+          document.getElementById(formId !== undefined ? formId + 'From' : 'from').classList.remove('hidden-field')
+          document.getElementById(formId !== undefined ? formId + 'To' : 'to').classList.remove('hidden-field')
           startFields.classList.remove('hidden-field') // 显示公交车的发车时间字段
           mField.classList.remove('hidden-field') // 显示耗时字段
           mLabel.classList.remove('hidden-field')
           fromLabel.classList.remove('hidden-field')
           toLabel.classList.remove('hidden-field')
         } else if (type === 'railway') {
-          document.getElementById('from').classList.remove('hidden-field')
-          document.getElementById('to').classList.remove('hidden-field')
+          document.getElementById(formId !== undefined ? formId + 'From' : 'from').classList.remove('hidden-field')
+          document.getElementById(formId !== undefined ? formId + 'To' : 'to').classList.remove('hidden-field')
           wayFields.classList.remove('hidden-field') // 显示火车的途径时间字段
           mField.classList.add('hidden-field') // 隐藏耗时字段
           mLabel.classList.add('hidden-field')
+          fromLabel.classList.remove('hidden-field')
+          toLabel.classList.remove('hidden-field')
         } else if (type === 'main') {
           additionalFields.classList.remove('hidden-field') // 显示主要活动的额外字段
           // 隐藏出发地、目的地和耗时字段
-          document.getElementById('from').classList.add('hidden-field')
-          document.getElementById('to').classList.add('hidden-field')
+          document.getElementById(formId !== undefined ? formId + 'From' : 'from').classList.add('hidden-field')
+          document.getElementById(formId !== undefined ? formId + 'To' : 'to').classList.add('hidden-field')
           mField.classList.add('hidden-field')
           fromLabel.classList.add('hidden-field')
           toLabel.classList.add('hidden-field')
           mLabel.classList.add('hidden-field')
         } else {
-          document.getElementById('from').classList.remove('hidden-field')
-          document.getElementById('to').classList.remove('hidden-field')
+          document.getElementById(formId !== undefined ? formId + 'From' : 'from').classList.remove('hidden-field')
+          document.getElementById(formId !== undefined ? formId + 'To' : 'to').classList.remove('hidden-field')
           mField.classList.remove('hidden-field') // 显示耗时字段（步行类型）
           fromLabel.classList.remove('hidden-field')
           toLabel.classList.remove('hidden-field')
           mLabel.classList.remove('hidden-field')
         }
       }
+
       // 获取额外字段的值
       function getAdditionalFieldValues(selectedType) {
         const additionalValues = {}

@@ -99,17 +99,6 @@
         background-color: #555;
       }
 
-      /* 在手机端设置侧边栏的宽度 */
-      @media screen and (max-width: 768px) {
-        #sidebar {
-          width: 100px; /* 在手机端设置较小的宽度 */
-        }
-        #sidebar ul li {
-          text-align: center;
-          padding-left: 0;
-        }
-      }
-
       .way-container {
         display: flex;
         flex-direction: column;
@@ -342,6 +331,35 @@
         color: #666;
         margin-right: 10px;
       }
+
+      .image-container {
+        width: 100%;
+      }
+
+      .image-container img {
+        width: auto;
+        height: 300px;
+      }
+
+      table {
+        width: 100%;
+      }
+
+      /* 在手机端设置侧边栏的宽度 */
+      @media screen and (max-width: 768px) {
+        #sidebar {
+          width: 100px; /* 在手机端设置较小的宽度 */
+        }
+        #sidebar ul li {
+          text-align: center;
+          padding-left: 0;
+        }
+
+        .image-container img {
+          width: 100%;
+          height: auto;
+        }
+      }
     </style>
   </head>
   <body>
@@ -369,7 +387,7 @@
             style="padding-right: 10px; padding-left: 10px; display: flex; justify-content: center; align-items: center"
           >
             <div class="image-container" style="width: 100%">
-              <img src="img/pay.56aa92a0.jpg" class="image-inner" />
+              <img src="./pay.png" class="image-inner" />
             </div>
           </div>
           <div class="col-12 guttered" style="padding-right: 10px; padding-left: 10px">
@@ -384,14 +402,8 @@
                       <th class="column">反馈</th>
                     </tr>
                   </thead>
-                  <tbody>
-                    <tr class="row">
-                      <td class="column">鸡你太美</td>
-                      <td class="column">0.3</td>
-                      <td class="column">大佬加油啊，希望能加上权重</td>
-                      <td class="column">已加</td>
-                    </tr>
-                    <!-- Add more rows here -->
+                  <tbody id="supportAuthorTableBody">
+                    <!-- JavaScript will dynamically generate rows here -->
                   </tbody>
                 </table>
               </div>
@@ -1777,6 +1789,50 @@
         })
       }
       displayUpdateLog()
+      // 生成支持作者界面的函数
+      function generateSupportAuthorUI() {
+        // 获取支持作者表格的 tbody 元素
+        const supportAuthorTableBody = document.getElementById('supportAuthorTableBody')
+
+        // 清空表格内容
+        supportAuthorTableBody.innerHTML = ''
+
+        // 遍历数据数组，生成表格行
+        supportData.forEach((data) => {
+          // 创建表格行
+          const row = document.createElement('tr')
+          row.classList.add('row')
+
+          // 创建并设置单元格内容
+          const nameCell = document.createElement('td')
+          nameCell.classList.add('column')
+          nameCell.textContent = data.name
+
+          const amountCell = document.createElement('td')
+          amountCell.classList.add('column')
+          amountCell.textContent = data.amount
+
+          const messageCell = document.createElement('td')
+          messageCell.classList.add('column')
+          messageCell.textContent = data.message
+
+          const feedbackCell = document.createElement('td')
+          feedbackCell.classList.add('column')
+          feedbackCell.textContent = data.feedback
+
+          // 将单元格添加到行中
+          row.appendChild(nameCell)
+          row.appendChild(amountCell)
+          row.appendChild(messageCell)
+          row.appendChild(feedbackCell)
+
+          // 将行添加到表格中
+          supportAuthorTableBody.appendChild(row)
+        })
+      }
+
+      // 调用函数生成界面
+      generateSupportAuthorUI()
 
       // 删除发车时间
       function deleteEditStartTime(index) {

@@ -114,6 +114,11 @@ const updateLog = [
   { date: '2024-05-22', content: '修复了导入数据时可能出现的错误。' },
   { date: '2024-05-25', content: '优化了界面美观度，增加了更新日志界面。' },
 ]
+// 定义支持作者的数据数组
+const supportData = [
+  // { name: '鸡你太美', amount: '0.3', message: '大佬加油啊，希望能加上权重', feedback: '已加' },
+  // 可以继续添加更多数据
+]
 // console.log(ways1)
 
 // const way = [

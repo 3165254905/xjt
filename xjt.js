@@ -274,7 +274,7 @@ function render() {
     }
     if (hasMustBeEntime) time = lastItem.mustbeentime
     for (let i = way.length - 1; i >= 0; i--) {
-      if (haslunch === true) {
+      if (way[i].eat === true) {
         haslunch = '吃过啦'
         const arrive = time
         time = subtractMinutesFromTime(time, config.mealTime.val)
@@ -295,7 +295,17 @@ function render() {
       if (way[i].type === 'bus') {
         const lastTime = time
         time = subtractMinutesFromTime(time, way[i].m)
-        const go = findMaxTimeBeforeEndTime(way[i].start, time)
+        let go = findMaxTimeBeforeEndTime(way[i].start, time)
+
+        // 使用Math.min找出数组中的最小值
+        const earliestTime = Math.min(...way[i].start.map(parseTime))
+        if (earliestTime > parseTime(time)) {
+          alert(
+            `${way[i].from} - ${way[i].to}的公交车的最早时间为${Math.floor(earliestTime / 60)}:${
+              earliestTime % 60
+            }，而当前配置需要在${time}之前上车，请修改配置`,
+          )
+        }
         time = go
         const arrive = subtractMinutesFromTime(go, -way[i].m)
         result.push({
@@ -311,6 +321,7 @@ function render() {
           past: calculateTimeDifferenceAsString(go, arrive),
         })
       }
+
       if (way[i].type === 'railway') {
         const go = findLatestEndTimeBeforeGivenTime(way[i].way, time)
         const index = findLatestEndTimeIndexBeforeGivenTime(way[i].way, time)
@@ -323,12 +334,12 @@ function render() {
           past: calculateTimeDifferenceAsString(go, arrive),
         })
       }
-      if (way[i].eat === true && haslunch !== '吃过啦') {
-        haslunch = true
-        shouldlunch = true
-        i = way.length
-        result.length = 0
-      }
+      // if (way[i].eat === true && haslunch !== '吃过啦') {
+      //   haslunch = true
+      //   shouldlunch = true
+      //   i = way.length
+      //   result.length = 0
+      // }
     }
     // 对数组按时间排序
     result.sort((a, b) => {
@@ -356,19 +367,19 @@ function render() {
       })
     }
 
-    if (shouldlunch && isTimeBeforeSpecificTime('12:00', time)) {
-      shouldlunch = false
-      const go = time
-      time = subtractMinutesFromTime(time, -config.mealTime.val)
-      const arrive = time
-      result.push({
-        type: 'eat',
-        path: `吃饭`,
-        go,
-        arrive,
-        past: calculateTimeDifferenceAsString(go, arrive),
-      })
-    }
+    // if (shouldlunch && isTimeBeforeSpecificTime('12:00', time)) {
+    //   shouldlunch = false
+    //   const go = time
+    //   time = subtractMinutesFromTime(time, -config.mealTime.val)
+    //   const arrive = time
+    //   result.push({
+    //     type: 'eat',
+    //     path: `吃饭`,
+    //     go,
+    //     arrive,
+    //     past: calculateTimeDifferenceAsString(go, arrive),
+    //   })
+    // }
     for (let i = 0; i < way.length; i++) {
       // console.log(i, way.length)
       if (way[i].type === 'foot') {
@@ -434,11 +445,21 @@ function render() {
           past: calculateTimeDifferenceAsString(go, arrive),
         })
       }
-      if (way[i].eat === true && haslunch !== '吃过啦') {
-        haslunch = true
-        i = way.length
-        result.length = 0
-        timeInit()
+      if (way[i].eat === true) {
+        const go = time
+        time = subtractMinutesFromTime(time, -config.mealTime.val)
+        const arrive = time
+        result.push({
+          type: 'eat',
+          path: `吃饭`,
+          go,
+          arrive,
+          past: calculateTimeDifferenceAsString(go, arrive),
+        })
+        // haslunch = true
+        // i = way.length
+        // result.length = 0
+        // timeInit()
       }
     }
     if (shouldlunch && isTimeBeforeSpecificTime(time, '12:00')) {
@@ -786,7 +807,6 @@ function findMaxTimeBeforeEndTime(times, endTime) {
       maxMinutes = minutes
     }
   }
-
   return maxTime
 }
 //找出times中endTime之后的最小时间，返回时间
@@ -982,4 +1002,9 @@ function findEarliestStartTimeIndexAfterGivenTime(way, givenTime) {
   })
 
   return minEndTimeIndex
+}
+// 解析时间字符串并返回以分钟为单位的时间
+function parseTime(timeString) {
+  const [hours, minutes] = timeString.split(':').map(Number)
+  return hours * 60 + minutes
 }

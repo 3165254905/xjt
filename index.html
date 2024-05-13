@@ -1529,7 +1529,8 @@
           }
           newWay = { type, name, start: startTime, end: endTime }
         }
-
+        if (ways[index].eat !== undefined) newWay.eat = ways[index].eat
+        if (ways[index].mustbeentime !== undefined) newWay.mustbeentime = ways[i].mustbeentime
         // 将编辑后的路径对象插入到指定的索引位置
         ways.splice(index, 1, newWay)
 

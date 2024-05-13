@@ -413,7 +413,7 @@
       </div>
     </div>
     <div id="updateLog" class="hidden">
-      <h2>更新日志</h2>
+      <!-- <h2>更新日志</h2> -->
       <div id="updateLogContent"></div>
     </div>
     <!-- 原始表格内容 -->
@@ -1784,7 +1784,8 @@
         updateLog.forEach((update) => {
           const updateItem = document.createElement('div')
           updateItem.classList.add('update-item')
-          updateItem.innerHTML = `<span class="update-date">${update.date}</span>: ${update.content}`
+          // updateItem.innerHTML = `<span class="update-date">${update.date}</span>: ${update.content}`
+          updateItem.innerHTML = `${update.content}`
           updateLogContent.appendChild(updateItem)
         })
       }

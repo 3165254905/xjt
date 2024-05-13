@@ -355,8 +355,51 @@
         <li><a href="#" id="configLink" onclick="setActive(this)">修改配置</a></li>
         <li><a href="#" id="dataLink" onclick="setActive(this)">数据管理</a></li>
         <li><a href="#" id="logLink" onclick="setActive(this)">更新日志</a></li>
+        <li><a href="#" id="supportLink" onclick="setActive(this)">支持作者</a></li>
       </ul>
     </nav>
+    <div id="supportAuthor" class="hidden">
+      <div class="app-container">
+        <div class="row justify-center align-middle">
+          <h2>打赏创作者</h2>
+        </div>
+        <div class="row justify-center" style="margin-left: -10px; margin-right: -10px">
+          <div
+            class="col-12 guttered"
+            style="padding-right: 10px; padding-left: 10px; display: flex; justify-content: center; align-items: center"
+          >
+            <div class="image-container" style="width: 100%">
+              <img src="img/pay.56aa92a0.jpg" class="image-inner" />
+            </div>
+          </div>
+          <div class="col-12 guttered" style="padding-right: 10px; padding-left: 10px">
+            <div class="card">
+              <div class="card-body">
+                <table class="table">
+                  <thead>
+                    <tr>
+                      <th class="column">昵称</th>
+                      <th class="column">金额</th>
+                      <th class="column">留言</th>
+                      <th class="column">反馈</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr class="row">
+                      <td class="column">鸡你太美</td>
+                      <td class="column">0.3</td>
+                      <td class="column">大佬加油啊，希望能加上权重</td>
+                      <td class="column">已加</td>
+                    </tr>
+                    <!-- Add more rows here -->
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
     <div id="updateLog" class="hidden">
       <h2>更新日志</h2>
       <div id="updateLogContent"></div>
@@ -863,6 +906,7 @@
       const configContent = document.getElementById('configContent')
       const dataManagement = document.getElementById('dataManagement')
       const updateLogContent = document.getElementById('updateLog')
+      const supportAuthor = document.getElementById('supportAuthor')
 
       // 获取侧边导航栏的链接
       const tableLink = document.getElementById('tableLink')
@@ -871,6 +915,7 @@
       const configLink = document.getElementById('configLink')
       const dataLink = document.getElementById('dataLink')
       const logLink = document.getElementById('logLink')
+      const supportLink = document.getElementById('supportLink')
 
       // 添加事件监听器以切换界面
       tableLink.addEventListener('click', () => {
@@ -879,6 +924,7 @@
         configContent.classList.add('hidden')
         dataManagement.classList.add('hidden')
         updateLogContent.classList.add('hidden')
+        supportAuthor.classList.add('hidden')
       })
 
       formLink.addEventListener('click', () => {
@@ -889,6 +935,7 @@
         configContent.classList.add('hidden')
         dataManagement.classList.add('hidden')
         updateLogContent.classList.add('hidden')
+        supportAuthor.classList.add('hidden')
       })
       // 添加事件监听器以切换界面
       configLink.addEventListener('click', () => {
@@ -897,6 +944,7 @@
         configContent.classList.remove('hidden')
         dataManagement.classList.add('hidden')
         updateLogContent.classList.add('hidden')
+        supportAuthor.classList.add('hidden')
       })
       // 添加事件监听器以切换界面
       dataLink.addEventListener('click', () => {
@@ -905,6 +953,7 @@
         configContent.classList.add('hidden')
         dataManagement.classList.remove('hidden')
         updateLogContent.classList.add('hidden')
+        supportAuthor.classList.add('hidden')
       })
       // 添加事件监听器以切换界面
       logLink.addEventListener('click', () => {
@@ -913,6 +962,16 @@
         configContent.classList.add('hidden')
         dataManagement.classList.add('hidden')
         updateLogContent.classList.remove('hidden')
+        supportAuthor.classList.add('hidden')
+      })
+      // 添加事件监听器以切换界面
+      supportLink.addEventListener('click', () => {
+        tableContent.classList.add('hidden')
+        formContent.classList.add('hidden')
+        configContent.classList.add('hidden')
+        dataManagement.classList.add('hidden')
+        updateLogContent.classList.add('hidden')
+        supportAuthor.classList.remove('hidden')
       })
       // 添加事件监听器以显示/隐藏侧边栏
       menuButton.addEventListener('click', () => {
@@ -928,6 +987,7 @@
             configContent.style.marginLeft = '200px'
             dataManagement.style.marginLeft = '200px'
             updateLogContent.style.marginLeft = '200px'
+            supportAuthor.style.marginLeft = '200px'
             modal.style.marginLeft = '200px'
             modal.style.width = 'calc(100vw - 200px)'
             editModal.style.marginLeft = '200px'
@@ -941,6 +1001,7 @@
           configContent.style.marginLeft = '0'
           dataManagement.style.marginLeft = '0'
           updateLogContent.style.marginLeft = '0'
+          supportAuthor.style.marginLeft = '0'
           modal.style.marginLeft = '0'
           modal.style.width = '100vw'
           editModal.style.marginLeft = '0'

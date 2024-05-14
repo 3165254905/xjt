@@ -2,9 +2,15 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <title>时间数据表格</title>
+    <script src="./echarts.min.js"></script>
     <style>
+      #chart-container {
+        width: 100%;
+        height: 300px;
+        margin: 0 auto;
+      }
       table {
         border-collapse: collapse;
         width: 100%;
@@ -432,6 +438,7 @@
           <!-- 表格内容将在此动态生成 -->
         </tbody>
       </table>
+      <div id="chart-container"></div>
     </div>
     <!-- 新增的修改界面 -->
     <div id="formContent" class="hidden">
@@ -1836,7 +1843,83 @@
 
       // 调用函数生成界面
       generateSupportAuthorUI()
+      function generatePieChart(paths) {
+        // 计算总时间
+        function calculateTotalTime(paths) {
+          let totalTime = 0
+          paths.forEach((path) => {
+            totalTime += parseTime(path.past)
+          })
+          return totalTime
+        }
 
+        // 解析时间字符串为分钟
+        function parseTime(timeString) {
+          const parts = timeString.split('时')
+          let minutes = 0
+          if (parts.length === 1) {
+            minutes = parseInt(parts[0].replace('分', ''))
+          } else {
+            minutes = parseInt(parts[0]) * 60 + parseInt(parts[1].replace('分', ''))
+          }
+          return minutes
+        }
+
+        // 生成饼图数据
+        function generatePieChartData(paths) {
+          const totalTime = calculateTotalTime(paths)
+          const data = {}
+          paths.forEach((path) => {
+            if (path.type in data) {
+              data[path.type] += parseTime(path.past)
+            } else {
+              data[path.type] = parseTime(path.past)
+            }
+          })
+          const pieData = []
+          for (const type in data) {
+            const percentage = ((data[type] / totalTime) * 100).toFixed(2)
+            pieData.push({ name: type, value: percentage })
+          }
+          return pieData
+        }
+
+        // 初始化 ECharts
+        const chartContainer = document.getElementById('chart-container')
+        const chart = echarts.init(chartContainer)
+
+        // 生成饼图
+        chart.setOption({
+          title: {
+            text: '时间分布',
+            left: 'center',
+          },
+          tooltip: {
+            trigger: 'item',
+            formatter: '{a} <br/>{b} : {c}%',
+          },
+          series: [
+            {
+              name: '时间百分比',
+              type: 'pie',
+              radius: '55%',
+              center: ['50%', '50%'],
+              data: generatePieChartData(paths),
+              emphasis: {
+                itemStyle: {
+                  shadowBlur: 10,
+                  shadowOffsetX: 0,
+                  shadowColor: 'rgba(0, 0, 0, 0.5)',
+                },
+              },
+              label: {
+                show: true,
+                formatter: '{b} : {d}%',
+              },
+            },
+          ],
+        })
+      }
       // 删除发车时间
       function deleteEditStartTime(index) {
         const startInputs = document.getElementById('editStartInputs')
@@ -1866,6 +1949,8 @@
         renderTable()
         renderWayContainer()
         generateConfigUI()
+        // 生成饼图
+        generatePieChart(updatedPaths)
       }
     </script>
   </body>

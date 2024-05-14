@@ -1102,6 +1102,7 @@
 
       // 定义一个全局变量用于存储表单提交事件监听器
       let submitEventListener = null
+      let submitEventListener1 = null
       // 添加公交车的发车时间字段
       function addTimeField(containerId) {
         const container = document.getElementById(containerId)
@@ -1432,12 +1433,12 @@
         const editForm = document.getElementById('editForm')
 
         // 移除之前的事件监听器
-        if (submitEventListener) {
-          editForm.removeEventListener('submit', submitEventListener)
+        if (submitEventListener1) {
+          editForm.removeEventListener('submit', submitEventListener1)
         }
 
         // 修改提交事件处理函数以适应新的字段结构
-        submitEventListener = function (event) {
+        submitEventListener1 = function (event) {
           event.preventDefault()
 
           // 获取表单数据
@@ -1458,7 +1459,7 @@
         }
 
         // 添加表单提交事件监听器
-        editForm.addEventListener('submit', submitEventListener)
+        editForm.addEventListener('submit', submitEventListener1)
 
         // 根据选择的类型动态显示/隐藏额外输入字段
         const editTypeSelect = document.getElementById('editType')
@@ -1530,7 +1531,7 @@
           newWay = { type, name, start: startTime, end: endTime }
         }
         if (ways[index].eat !== undefined) newWay.eat = ways[index].eat
-        if (ways[index].mustbeentime !== undefined) newWay.mustbeentime = ways[i].mustbeentime
+        if (ways[index].mustbeentime !== undefined) newWay.mustbeentime = ways[index].mustbeentime
         // 将编辑后的路径对象插入到指定的索引位置
         ways.splice(index, 1, newWay)
 
@@ -1674,7 +1675,7 @@
         submitButton.className = 'save-button' // 添加class
         submitButton.addEventListener('click', () => {
           // 收集表单数据
-          const name = document.getElementById('name').value
+          const name = document.getElementById('fName').value
           const wakeUpPreparationTime = document.getElementById('wakeUpPreparationTime').value
           const preventMissingHighSpeedRailTime = document.getElementById('preventMissingHighSpeedRailTime').value
           const mealTime = document.getElementById('mealTime').value
@@ -1683,7 +1684,7 @@
           config.wakeUpPreparationTime.val = wakeUpPreparationTime
           config.preventMissingHighSpeedRailTime.val = preventMissingHighSpeedRailTime
           config.mealTime.val = mealTime
-          config.name.val = name
+          config.fName.val = name
 
           refresh()
 
@@ -1750,7 +1751,7 @@
         const url = URL.createObjectURL(blob)
         const a = document.createElement('a')
         a.href = url
-        a.download = config.name.val + '.json'
+        a.download = config.fName.val + '.json'
         document.body.appendChild(a)
         a.click()
         document.body.removeChild(a)

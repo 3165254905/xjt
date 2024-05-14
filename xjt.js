@@ -1,110 +1,110 @@
 let ways = [
-  { type: 'foot', from: '越新公寓', to: '景泰嘉苑', m: '10' },
-  {
-    type: 'bus',
-    from: '景泰嘉苑',
-    to: '绍兴北站公交站',
-    m: '50',
-    start: ['6:50', '7:15', '7:35', '7:55', '8:25', '8:45'],
-  },
-  { type: 'foot', from: '绍兴北站公交站', to: '绍兴北火车站', m: '10' },
-  {
-    type: 'railway',
-    from: '绍兴北火车站',
-    to: '温州南火车站',
-    way: [
-      { start: '6:52', end: '9:52' },
-      { start: '7:41', end: '9:59' },
-      { start: '7:51', end: '10:33' },
-      { start: '8:00', end: '10:58' },
-      { start: '8:10', end: '10:44' },
-      { start: '8:28', end: '11:05' },
-      { start: '8:42', end: '11:29' },
-      { start: '8:58', end: '11:48' },
-    ],
-  },
-  {
-    type: 'foot',
-    from: '温州南火车站',
-    to: '火车南站公交枢纽',
-    m: 20,
-  },
-  {
-    type: 'bus',
-    from: '火车南站公交枢纽',
-    to: '吾邻路口',
-    m: 25,
-    start: ['11:02', '11:07', '11:14', '11:20', '11:26', '11:31', '11:37', '11:44', '11:50', '11:56', '12:04'],
-  },
-  {
-    type: 'foot',
-    from: '吾邻路口',
-    to: 'Meaning Space意空间',
-    m: 5,
-    eat: true,
-    mustbeentime: '13:00',
-  },
-  { type: 'main', name: '温州·【瓯越偶像日Vol06】CrossingX意次元·Idol Live', start: '13:00', end: '17:00', eat: true },
-  {
-    type: 'foot',
-    to: '吾邻路口',
-    from: 'Meaning Space意空间',
-    m: 5,
-  },
-  {
-    type: 'bus',
-    to: '火车南站公交枢纽',
-    from: '吾邻路口',
-    m: 25,
-    beizhu: 35,
-    start: [
-      '17:41',
-      '17:47',
-      '17:52',
-      '17:58',
-      '18:04',
-      '18:09',
-      '18:15',
-      '18:19',
-      '18:24',
-      '18:34',
-      '18:42',
-      '18:47',
-      '18:51',
-      '18:56',
-      '19:02',
-    ],
-  },
-  {
-    type: 'foot',
-    to: '温州南火车站',
-    from: '火车南站公交枢纽',
-    m: 5,
-  },
-  {
-    type: 'railway',
-    to: '绍兴北火车站',
-    from: '温州南火车站',
-    way: [
-      { start: '20:14', end: '22:28' },
-      { start: '19:47', end: '21:59' },
-      { start: '18:56', end: '21:35' },
-      { start: '18:34', end: '21:12' },
-      { start: '19:28', end: '21:03' },
-    ],
-  },
-  { type: 'foot', to: '绍兴北站公交站', from: '绍兴北火车站', m: '20' },
-  {
-    type: 'bus',
-    to: '鲁迅高级中学东门',
-    from: '绍兴北站公交站',
-    m: '45',
-    start: ['20:15', '20:35', '21:05', '21:35', '22:05', '22:35'],
-  },
-  { type: 'foot', to: '越新公寓', from: '鲁迅高级中学东门', m: '25', mustbeentime: '23:00' },
+  // { type: 'foot', from: '越新公寓', to: '景泰嘉苑', m: '10' },
+  // {
+  //   type: 'bus',
+  //   from: '景泰嘉苑',
+  //   to: '绍兴北站公交站',
+  //   m: '50',
+  //   start: ['6:50', '7:15', '7:35', '7:55', '8:25', '8:45'],
+  // },
+  // { type: 'foot', from: '绍兴北站公交站', to: '绍兴北火车站', m: '10' },
+  // {
+  //   type: 'railway',
+  //   from: '绍兴北火车站',
+  //   to: '温州南火车站',
+  //   way: [
+  //     { start: '6:52', end: '9:52' },
+  //     { start: '7:41', end: '9:59' },
+  //     { start: '7:51', end: '10:33' },
+  //     { start: '8:00', end: '10:58' },
+  //     { start: '8:10', end: '10:44' },
+  //     { start: '8:28', end: '11:05' },
+  //     { start: '8:42', end: '11:29' },
+  //     { start: '8:58', end: '11:48' },
+  //   ],
+  // },
+  // {
+  //   type: 'foot',
+  //   from: '温州南火车站',
+  //   to: '火车南站公交枢纽',
+  //   m: 20,
+  // },
+  // {
+  //   type: 'bus',
+  //   from: '火车南站公交枢纽',
+  //   to: '吾邻路口',
+  //   m: 25,
+  //   start: ['11:02', '11:07', '11:14', '11:20', '11:26', '11:31', '11:37', '11:44', '11:50', '11:56', '12:04'],
+  // },
+  // {
+  //   type: 'foot',
+  //   from: '吾邻路口',
+  //   to: 'Meaning Space意空间',
+  //   m: 5,
+  //   eat: true,
+  //   mustbeentime: '13:00',
+  // },
+  // { type: 'main', name: '温州·【瓯越偶像日Vol06】CrossingX意次元·Idol Live', start: '13:00', end: '17:00', eat: true },
+  // {
+  //   type: 'foot',
+  //   to: '吾邻路口',
+  //   from: 'Meaning Space意空间',
+  //   m: 5,
+  // },
+  // {
+  //   type: 'bus',
+  //   to: '火车南站公交枢纽',
+  //   from: '吾邻路口',
+  //   m: 25,
+  //   beizhu: 35,
+  //   start: [
+  //     '17:41',
+  //     '17:47',
+  //     '17:52',
+  //     '17:58',
+  //     '18:04',
+  //     '18:09',
+  //     '18:15',
+  //     '18:19',
+  //     '18:24',
+  //     '18:34',
+  //     '18:42',
+  //     '18:47',
+  //     '18:51',
+  //     '18:56',
+  //     '19:02',
+  //   ],
+  // },
+  // {
+  //   type: 'foot',
+  //   to: '温州南火车站',
+  //   from: '火车南站公交枢纽',
+  //   m: 5,
+  // },
+  // {
+  //   type: 'railway',
+  //   to: '绍兴北火车站',
+  //   from: '温州南火车站',
+  //   way: [
+  //     { start: '20:14', end: '22:28' },
+  //     { start: '19:47', end: '21:59' },
+  //     { start: '18:56', end: '21:35' },
+  //     { start: '18:34', end: '21:12' },
+  //     { start: '19:28', end: '21:03' },
+  //   ],
+  // },
+  // { type: 'foot', to: '绍兴北站公交站', from: '绍兴北火车站', m: '20' },
+  // {
+  //   type: 'bus',
+  //   to: '鲁迅高级中学东门',
+  //   from: '绍兴北站公交站',
+  //   m: '45',
+  //   start: ['20:15', '20:35', '21:05', '21:35', '22:05', '22:35'],
+  // },
+  // { type: 'foot', to: '越新公寓', from: '鲁迅高级中学东门', m: '25', mustbeentime: '23:00' },
 ]
 let config = {
-  name: { val: '越新公寓 - 瓯越偶像日', meaning: '保存文件名称' },
+  fName: { val: '越新公寓 - 瓯越偶像日', meaning: '保存文件名称' },
   wakeUpPreparationTime: { val: 40, meaning: '起床准备时间(m)' },
   preventMissingHighSpeedRailTime: { val: 15, meaning: '防止错过高铁时间(m)' },
   mealTime: { val: 40, meaning: '吃饭时间(m)' },
@@ -515,7 +515,7 @@ render()
 //     past: calculateTimeDifferenceAsString(go, arrive),
 //   })
 // }
-const eatedTime = time
+// const eatedTime = time
 const way2 = [
   { type: 'foot', to: '越新公寓', from: '鲁迅高级中学东门', m: '25' },
   {
@@ -629,14 +629,14 @@ const templength = result.length
 //     timeInit()
 //   }
 // }
-result.length = templength
-result.push({
-  type: 'free',
-  path: `空闲`,
-  go: eatedTime,
-  arrive: time,
-  past: calculateTimeDifferenceAsString(eatedTime, time),
-})
+// result.length = templength
+// result.push({
+//   type: 'free',
+//   path: `空闲`,
+//   go: eatedTime,
+//   arrive: time,
+//   past: calculateTimeDifferenceAsString(eatedTime, time),
+// })
 // for (let i = way2.length - 1; i >= 0; i--) {
 //   if (way2[i].type === 'foot') {
 //     const go = time

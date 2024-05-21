@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ChatGPT Integration</title>
+  </head>
+  <body>
+    <h1>ChatGPT 问答</h1>
+    <input type="text" id="question" placeholder="输入你的问题" />
+    <button onclick="askQuestion()">问</button>
+    <p id="answer"></p>
+
+    <script>
+      async function askQuestion() {
+        const question = document.getElementById('question').value
+
+        const response = await fetch('/.netlify/functions/askChatGPT', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ question }),
+        })
+
+        const data = await response.json()
+        document.getElementById('answer').innerText = data.answer
+      }
+    </script>
+  </body>
+</html>

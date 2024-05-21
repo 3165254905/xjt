@@ -15,7 +15,7 @@
       async function askQuestion() {
         const question = document.getElementById('question').value
 
-        const response = await fetch('/.netlify/functions/hello-world', {
+        const response = await fetch('/.netlify/functions/askChatGPT', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',

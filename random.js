@@ -1,11 +1,12 @@
 $(function () {
   var run = 0,
     heading = $('h1'),
-    timer
+    timer,
+    $i = 0
 
   $('#start').click(function () {
-    var list = $('#list').val().replace(/ +/g, ' ').replace(/^ | $/g, '').split(' ')
     if (!run) {
+      var list = $('#list').val().replace(/ +/g, ' ').replace(/^ | $/g, '').split(' ')
       heading.html(heading.html().replace('吃这个！', '吃什么？'))
       $(this).val('停止')
       timer = setInterval(function () {
@@ -42,6 +43,18 @@ $(function () {
 
   document.onkeydown = function enter(e) {
     var e = e || event
-    if (e.keyCode == 13) $('#start').trigger('click')
+    if (e.keyCode == 13) {
+      $('#start').trigger('click')
+      if (run) {
+        // 仅当计时器运行时触发
+        if ($i >= 3) {
+          clearInterval(timer) // 清除计时器
+          alert('这么作？今天别吃了！')
+          run = 0 // 重置运行标志
+          $('#start').val('不行，换一个') // 更新按钮文本
+        }
+        $i++
+      }
+    }
   }
 })

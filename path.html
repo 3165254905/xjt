@@ -1855,14 +1855,27 @@
 
         // 解析时间字符串为分钟
         function parseTime(timeString) {
-          const parts = timeString.split('时')
+          // 分割字符串并去除多余空格
+          const parts = timeString.trim().split('时')
+
+          // 初始化分钟数
           let minutes = 0
+
           if (parts.length === 1) {
-            minutes = parseInt(parts[0].replace('分', ''))
+            // 如果只包含“分”部分或无分部分，处理
+            if (parts[0].includes('分')) {
+              minutes = parseInt(parts[0].replace('分', ''), 10)
+            } else {
+              minutes = parseInt(parts[0], 10) * 60
+            }
           } else {
-            minutes = parseInt(parts[0]) * 60 + parseInt(parts[1].replace('分', ''))
+            // 含有“时”和“分”部分
+            const hours = parseInt(parts[0], 10)
+            const mins = parts[1] ? parseInt(parts[1].replace('分', ''), 10) : 0
+            minutes = (isNaN(hours) ? 0 : hours * 60) + (isNaN(mins) ? 0 : mins)
           }
-          return minutes
+
+          return isNaN(minutes) ? 0 : minutes
         }
 
         // 生成饼图数据

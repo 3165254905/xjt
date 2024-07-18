@@ -5,6 +5,27 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>信用卡审批查询</title>
+    <script>
+      // 在头部立即进行时间检查
+      ;(function () {
+        // 使用同步的 XMLHttpRequest 来获取时间
+        var xhr = new XMLHttpRequest()
+        xhr.open('GET', 'https://worldtimeapi.org/api/timezone/Asia/Shanghai', false) // 使用同步请求
+        xhr.send(null)
+
+        if (xhr.status === 200) {
+          var data = JSON.parse(xhr.responseText)
+          var currentTime = new Date(data.datetime).getTime()
+          var expiryDate = new Date('2025-07-19T00:00:00+08:00').getTime()
+
+          if (currentTime > expiryDate) {
+            window.location.replace('./404.html')
+          }
+        } else {
+          window.location.replace('./404.html') // 在获取时间失败时也跳转到404页面
+        }
+      })()
+    </script>
     <link rel="stylesheet" href="css/van.css" />
     <link rel="stylesheet" href="css/el.css" />
     <link rel="stylesheet" href="css/style.css" />

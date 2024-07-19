@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>数据表格</title>
+    <style>
+      .color-box-container {
+        display: flex;
+        justify-content: center;
+        margin-bottom: 20px;
+      }
+      .color-box {
+        width: 30px;
+        height: 30px;
+        margin: 0 5px;
+        cursor: pointer;
+      }
+      .color-box.green {
+        background-color: green;
+      }
+      .color-box.yellow {
+        background-color: yellow;
+      }
+      .color-box.red {
+        background-color: red;
+      }
+      .color-box.white {
+        background-color: white;
+      }
+      .color-box.none {
+        background-color: transparent;
+        border: 1px solid #ddd;
+      }
+      .table-container {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: space-between;
+      }
+      .table-container table {
+        width: calc(100% / 3 - 20px);
+        margin-bottom: 20px;
+        border-collapse: collapse;
+        table-layout: fixed;
+      }
+      th,
+      td {
+        border: 1px solid #ddd;
+        padding: 8px;
+        word-wrap: break-word;
+        height: 40px; /* 设置行高相等 */
+        text-align: center;
+      }
+      th {
+        background-color: #f2f2f2;
+      }
+      @media (max-width: 1200px) {
+        .table-container table {
+          width: calc(100% / 2 - 20px);
+        }
+      }
+      @media (max-width: 800px) {
+        .table-container table {
+          width: 100%;
+        }
+      }
+      @media (max-width: 600px) {
+        .table-container {
+          flex-direction: column;
+        }
+        .table-container table {
+          width: 100%;
+          margin-bottom: 10px;
+        }
+      }
+      .buttons {
+        margin-top: 20px;
+        text-align: center;
+      }
+      .buttons button {
+        margin: 5px;
+        padding: 10px 20px;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        color: white;
+      }
+      .buttons button.copy {
+        background-color: #4caf50; /* 绿色 */
+      }
+      .buttons button.export {
+        background-color: #2196f3; /* 蓝色 */
+      }
+      .buttons button.delete {
+        background-color: #f44336; /* 红色 */
+      }
+      .buttons button:hover {
+        opacity: 0.8;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="app">
+      <div class="color-box-container">
+        <div class="color-box green" @click="selectColor('green')"></div>
+        <div class="color-box yellow" @click="selectColor('yellow')"></div>
+        <div class="color-box red" @click="selectColor('red')"></div>
+        <div class="color-box white" @click="selectColor('white')"></div>
+        <div class="color-box none" @click="selectColor('')">×</div>
+      </div>
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th v-for="(header, index) in headers.slice(0, 3)" :key="index">{{ header }}</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="(row, rowIndex) in data" :key="rowIndex">
+              <td
+                v-for="(header, colIndex) in headers.slice(0, 3)"
+                :key="colIndex"
+                :data-label="header"
+                contenteditable="true"
+                :style="{ backgroundColor: row[header + 'Color'] }"
+                @input="updateData(rowIndex, header, $event.target.innerText)"
+                @click="fillColor(rowIndex, header)"
+              >
+                {{ row[header] }}
+              </td>
+            </tr>
+          </tbody>
+        </table>
+
+        <table>
+          <thead>
+            <tr>
+              <th v-for="(header, index) in headers.slice(3, 6)" :key="index">{{ header }}</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="(row, rowIndex) in data" :key="rowIndex">
+              <td
+                v-for="(header, colIndex) in headers.slice(3, 6)"
+                :key="colIndex"
+                :data-label="header"
+                contenteditable="true"
+                :style="{ backgroundColor: row[header + 'Color'] }"
+                @input="updateData(rowIndex, header, $event.target.innerText)"
+                @click="fillColor(rowIndex, header)"
+              >
+                {{ row[header] }}
+              </td>
+            </tr>
+          </tbody>
+        </table>
+
+        <table>
+          <thead>
+            <tr>
+              <th v-for="(header, index) in headers.slice(6, 9)" :key="index">{{ header }}</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="(row, rowIndex) in data" :key="rowIndex">
+              <td
+                v-for="(header, colIndex) in headers.slice(6, 9)"
+                :key="colIndex"
+                :data-label="header"
+                contenteditable="true"
+                :style="{ backgroundColor: row[header + 'Color'] }"
+                @input="updateData(rowIndex, header, $event.target.innerText)"
+                @click="fillColor(rowIndex, header)"
+              >
+                {{ row[header] }}
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="buttons">
+        <button class="copy" @click="copyToClipboard">复制到剪贴板</button>
+        <button class="export" @click="exportToExcel">导出为Excel</button>
+        <button class="delete" @click="confirmAndDelete">删除记录</button>
+      </div>
+    </div>
+
+    <footer style="text-align: center; margin-top: 20px">
+      <p>&copy; 2024 Runfeng Yu. All rights reserved. | Version: 1.0.0</p>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/vue@2.6.14"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.0/xlsx.full.min.js"></script>
+    <script>
+      new Vue({
+        el: '#app',
+        data: {
+          headers: ['列1', '列2', '列3', '列4', '列5', '列6', '列7', '列8', '列9'],
+          data: JSON.parse(localStorage.getItem('tableData')) || [
+            {
+              列1: '种田',
+              列2: '鱼塘深度',
+              列3: '绿',
+              列4: '召集星搭子',
+              列5: 8.22,
+              列6: '',
+              列7: '',
+              列8: '一起来玩',
+              列9: '任务',
+            },
+            {
+              列1: '农场等级',
+              列2: '鱼塘等级',
+              列3: '闲时操作',
+              列4: '1.减少小号登录',
+              列5: 1,
+              列6: '100专精',
+              列7: '峡谷竞技',
+              列8: '本周完成',
+              列9: '嘉年华',
+            },
+            {
+              列1: '蔬菜摊等级',
+              列2: '水产铺等级',
+              列3: '黄',
+              列4: '2.召回累登',
+              列5: 1,
+              列6: '狼人币',
+              列7: '峡谷英雄帖',
+              列8: '星游寻宝',
+              列9: '奖杯',
+            },
+            {
+              列1: '动物摊等级',
+              列2: '',
+              列3: '等待鱼塘',
+              列4: '3.邀请新星',
+              列5: 0,
+              列6: 7.25,
+              列7: 8.29,
+              列8: '2\\2',
+              列9: '狼人',
+            },
+            { 列1: '农田开垦', 列2: '', 列3: '红', 列4: '4.新星累登', 列5: 0, 列6: 8.8, 列7: '', 列8: '', 列9: '左' },
+            {
+              列1: '畜牧',
+              列2: '',
+              列3: '闲时可问',
+              列4: '收获鱼',
+              列5: '触发幸运钩（1h）',
+              列6: '气浪捕鱼成功（未知）',
+              列7: '赛季兑换',
+              列8: '星妙指南',
+              列9: '',
+            },
+            { 列1: '牧场开垦', 列2: '', 列3: '', 列4: '', 列5: '', 列6: '', 列7: '', 列8: '', 列9: '' },
+          ],
+          selectedColor: '',
+        },
+        methods: {
+          updateData(rowIndex, header, value) {
+            this.data[rowIndex][header] = value
+            localStorage.setItem('tableData', JSON.stringify(this.data))
+          },
+          selectColor(color) {
+            this.selectedColor = color
+          },
+          fillColor(rowIndex, header) {
+            if (this.selectedColor === '') return
+            this.$set(this.data[rowIndex], header + 'Color', this.selectedColor)
+            localStorage.setItem('tableData', JSON.stringify(this.data))
+          },
+          copyToClipboard() {
+            const dataString = JSON.stringify(this.data)
+            navigator.clipboard
+              .writeText(dataString)
+              .then(() => {
+                alert('数据已复制到剪贴板')
+              })
+              .catch((err) => {
+                alert('复制失败')
+                console.error('复制到剪贴板时发生错误: ', err)
+              })
+          },
+          exportToExcel() {
+            const wb = XLSX.utils.book_new()
+            const ws = XLSX.utils.json_to_sheet(this.data)
+            XLSX.utils.book_append_sheet(wb, ws, '数据')
+            XLSX.writeFile(wb, '数据表格.xlsx')
+          },
+          confirmAndDelete() {
+            if (confirm('确定要删除所有记录吗？')) {
+              localStorage.removeItem('tableData')
+            }
+          },
+        },
+      })
+    </script>
+  </body>
+</html>

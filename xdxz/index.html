@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Data Visualization</title>
+    <script src="../node_modules/vue/dist/vue.min.js"></script>
+    <script src="ch.js" defer></script>
+    <style>
+      .container {
+        margin: 20px;
+        font-family: Arial, sans-serif;
+      }
+      .category {
+        margin-bottom: 20px;
+      }
+      .title {
+        font-size: 1.5em;
+        font-weight: bold;
+        margin-bottom: 10px;
+      }
+      .content {
+        margin-left: 20px;
+        margin-bottom: 10px;
+      }
+      .content div {
+        margin-bottom: 5px;
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-bottom: 20px;
+      }
+      th,
+      td {
+        border: 1px solid #ddd;
+        padding: 8px;
+        text-align: center;
+      }
+      th {
+        background-color: #f2f2f2;
+      }
+      .warnings {
+        color: red;
+        font-weight: bold;
+        margin-top: 20px;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="app" class="container">
+      <table>
+        <thead>
+          <tr>
+            <th>类别</th>
+            <th>类型</th>
+            <th>数量</th>
+          </tr>
+        </thead>
+        <tbody>
+          <template v-for="(types, category) in counts" :key="category">
+            <tr v-for="(count, type) in types" :key="type">
+              <!-- 当索引为1时才显示 rowSpan -->
+              <td v-if="Object.keys(types).indexOf(type) === 0" :rowspan="Object.keys(types).length">{{ category }}</td>
+              <td>{{ type || '' }}</td>
+              <td>{{ count }}</td>
+            </tr>
+          </template>
+        </tbody>
+      </table>
+      <div v-for="(types, category) in data" :key="category" class="category">
+        <div class="title">{{ category }}</div>
+        <div class="content" v-for="(items, type) in types" :key="type">
+          <div>{{ type }}：{{ items.join('、') }}</div>
+        </div>
+      </div>
+      <div v-if="warnings.length" class="warnings">
+        <div v-for="warning in warnings" :key="warning">{{ warning }}</div>
+      </div>
+    </div>
+  </body>
+</html>

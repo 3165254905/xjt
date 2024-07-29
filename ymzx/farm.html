@@ -22,44 +22,68 @@
         text-align: center;
         color: #333;
       }
+
       .search-bar {
         display: flex;
+        flex-wrap: wrap;
         justify-content: space-between;
         align-items: center;
         margin-bottom: 20px;
       }
+
       .search-bar input {
         flex: 1;
         margin-right: 10px;
         padding: 10px;
         font-size: 16px;
       }
+
       .search-bar button {
         padding: 10px 20px;
         font-size: 16px;
         cursor: pointer;
       }
+
       table {
         width: 100%;
         border-collapse: collapse;
         box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        margin-bottom: 20px;
       }
+
       th,
       td {
         border: 1px solid #dddddd;
         text-align: left;
         padding: 12px;
       }
+
       th {
         background-color: #4caf50;
         color: white;
         cursor: pointer;
+        position: -webkit-sticky; /* Safari */
+        position: sticky;
+        top: 0;
       }
+
       tr:nth-child(even) {
         background-color: #f2f2f2;
       }
+
       .highlight-green {
         background-color: #90ee90 !important;
+      }
+      @media (max-width: 768px) {
+        #app {
+          width: 100%;
+        }
+        .search-bar {
+          flex-direction: column;
+        }
+        .search-bar input {
+          margin-bottom: 10px;
+        }
       }
     </style>
   </head>
@@ -100,7 +124,7 @@
         <tbody>
           <tr v-for="item in filteredData" :key="item.name">
             <td>{{ item.name }}</td>
-            <td>{{ formatNumber(Math.floor(item.price / item.count)) }}</td>
+            <td>{{ formatNumber(Math.floor(item.finalPrice / item.count)) }}</td>
             <td :class="{'highlight-green': item.status === '任意偷'  }">{{ formatNumber(item.steal) }}</td>
             <td :class="{'highlight-green':item.status === '任意偷' || item.status === '可偷丰收以上' }">
               {{ formatNumber(item.harvest) }}
@@ -228,13 +252,13 @@
             return num.toString()
           },
           addData(name, price, count) {
-            const steal = Math.floor(price / 5)
-            const harvest = Math.floor(steal * 1.5)
-            const vipHarvest = Math.floor(steal * 2)
-            const bumperHarvest = Math.floor(steal * 2.5)
-            const vipBumperHarvest = Math.floor(steal * 3)
             const finalPrice = this.getPrice(price, count)
-            const grade = Math.floor(price / 10000) + 1
+            const steal = Math.floor(finalPrice / 5)
+            const harvest = Math.floor(steal * 3)
+            const vipHarvest = Math.floor(steal * 4)
+            const bumperHarvest = Math.floor(steal * 10)
+            const vipBumperHarvest = Math.floor(steal * 13)
+            const grade = Math.floor(finalPrice / 10000) + 1
 
             this.data.push({
               name,
@@ -265,7 +289,12 @@
               this.sortDesc = false
             }
             const multiplier = this.sortDesc ? -1 : 1
-            this.filteredData.sort((a, b) => (a[key] > b[key] ? 1 : -1) * multiplier)
+            if (key == 'price')
+              this.filteredData.sort(
+                (a, b) =>
+                  (Math.floor(a.finalPrice / a.count) > Math.floor(b.finalPrice / b.count) ? 1 : -1) * multiplier,
+              )
+            else this.filteredData.sort((a, b) => (a[key] > b[key] ? 1 : -1) * multiplier)
           },
           filterData() {
             const queries = this.queries.filter((query) => query.trim())

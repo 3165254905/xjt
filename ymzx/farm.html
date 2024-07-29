@@ -180,7 +180,7 @@
           sortKey: '',
           sortDesc: false,
           queries: [''],
-          target: 10000,
+          target: 50000,
         },
         mounted() {
           this.addData('卷心菜', 20, 5)
@@ -271,7 +271,7 @@
           },
           addData(name, price, count, grade = 59) {
             const finalPrice = this.getPrice(price, grade)
-            const steal = Math.floor(finalPrice / 5)
+            const steal = Math.floor(finalPrice * 0.4)
             const harvest = Math.floor(steal * 3)
             const vipHarvest = Math.floor(steal * 4)
             const bumperHarvest = Math.floor(steal * 10)

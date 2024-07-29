@@ -97,6 +97,9 @@
       .buttons button:hover {
         opacity: 0.8;
       }
+      a{
+        all:unset;
+      }
     </style>
   </head>
   <body>
@@ -180,6 +183,9 @@
       </div>
 
       <div class="buttons">
+        <button class="copy"><a href="./farm.html">农场管理系统</button>
+      </div>
+      <div class="buttons">
         <button class="copy" @click="copyToClipboard">复制到剪贴板</button>
         <button class="export" @click="exportToExcel">导出为Excel</button>
         <button class="delete" @click="confirmAndDelete">删除记录</button>
@@ -190,7 +196,7 @@
       <p>&copy; 2024 Runfeng Yu. All rights reserved. | Version: 1.0.0</p>
     </footer>
 
-    <script src="./node_modules/vue/dist/vue.min.js"></script>
+    <script src="../node_modules/vue/dist/vue.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.0/xlsx.full.min.js"></script>
     <script>
       new Vue({

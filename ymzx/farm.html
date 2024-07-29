@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <!-- 引入Vue.js -->
+    <script src="../node_modules/vue/dist/vue.min.js"></script>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 0;
+        background-color: #f5f5f5;
+      }
+      #app {
+        width: 80%;
+        margin: auto;
+        margin-top: 20px;
+      }
+      h1 {
+        text-align: center;
+        color: #333;
+      }
+      .search-bar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+      }
+      .search-bar input {
+        flex: 1;
+        margin-right: 10px;
+        padding: 10px;
+        font-size: 16px;
+      }
+      .search-bar button {
+        padding: 10px 20px;
+        font-size: 16px;
+        cursor: pointer;
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      }
+      th,
+      td {
+        border: 1px solid #dddddd;
+        text-align: left;
+        padding: 12px;
+      }
+      th {
+        background-color: #4caf50;
+        color: white;
+        cursor: pointer;
+      }
+      tr:nth-child(even) {
+        background-color: #f2f2f2;
+      }
+      .highlight-green {
+        background-color: #90ee90 !important;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="app">
+      <h1>农场管理系统</h1>
+      <div class="search-bar">
+        <div>
+          搜索：
+          <input
+            v-for="(query, index) in queries"
+            :key="index"
+            v-model="queries[index]"
+            @input="filterData"
+            placeholder="输入名称搜索..."
+          />
+          <button @click="addSearchBox">添加搜索框</button>
+        </div>
+        <div>目标值：<input type="number" v-model="target" @input="updateStatus" placeholder="输入目标值" /></div>
+      </div>
+      当前等级: {{ grade }}
+      <table>
+        <thead>
+          <tr>
+            <th @click="sortData('name')">名称</th>
+            <th @click="sortData('price')">单价</th>
+            <th @click="sortData('steal')">偷</th>
+            <th @click="sortData('harvest')">偷丰收</th>
+            <th @click="sortData('vipHarvest')">偷VIP丰收</th>
+            <th @click="sortData('bumperHarvest')">偷大丰收</th>
+            <th @click="sortData('vipBumperHarvest')">偷VIP大丰收</th>
+            <th @click="sortData('finalPrice')">价格</th>
+            <th @click="sortData('count')">数量</th>
+            <th @click="sortData('grade')">农场等级</th>
+            <th>状态</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-for="item in filteredData" :key="item.name">
+            <td>{{ item.name }}</td>
+            <td>{{ formatNumber(Math.floor(item.price / item.count)) }}</td>
+            <td :class="{'highlight-green': item.status === '任意偷'  }">{{ formatNumber(item.steal) }}</td>
+            <td :class="{'highlight-green':item.status === '任意偷' || item.status === '可偷丰收以上' }">
+              {{ formatNumber(item.harvest) }}
+            </td>
+            <td
+              :class="{'highlight-green': item.status === '任意偷' || item.status === '可偷丰收以上' || item.status === '可偷VIP丰收以上'}"
+            >
+              {{ formatNumber(item.vipHarvest) }}
+            </td>
+            <td
+              :class="{'highlight-green': item.status === '任意偷' || item.status === '可偷丰收以上' || item.status === '可偷VIP丰收以上'||item.status === '可偷大丰收以上' }"
+            >
+              {{ formatNumber(item.bumperHarvest) }}
+            </td>
+            <td
+              :class="{'highlight-green': item.status === '任意偷' || item.status === '可偷丰收以上' || item.status === '可偷VIP丰收以上'||item.status === '可偷大丰收以上' || item.status === '可偷VIP大丰收以上' }"
+            >
+              {{ formatNumber(item.vipBumperHarvest) }}
+            </td>
+            <td>{{ formatNumber(item.finalPrice) }}</td>
+            <td>{{ formatNumber(item.count) }}</td>
+            <td>{{ item.grade }}</td>
+            <td>{{ item.status }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <script>
+      new Vue({
+        el: '#app',
+        data: {
+          data: [],
+          filteredData: [],
+          grade: 59,
+          sortKey: '',
+          sortDesc: false,
+          queries: [''],
+          target: 10000,
+        },
+        mounted() {
+          this.addData('卷心菜', 20, 5)
+          this.addData('番茄', 60, 5)
+          this.addData('玉米', 120, 5)
+          this.addData('黄瓜', 260, 5)
+          this.addData('南瓜', 480, 10)
+          this.addData('向日葵', 2400, 20)
+          this.addData('麦子', 8160, 40)
+          this.addData('白菜', 12000, 10)
+          this.addData('粉色风铃草', 66000, 20)
+          this.addData('草莓', 46000, 40)
+          this.addData('花菜', 2000, 20)
+          this.addData('冬瓜', 9840, 10)
+          this.addData('西瓜', 16000, 10)
+          this.addData('黄色郁金香', 81000, 20)
+          this.addData('生菜', 56000, 20)
+          this.addData('大葱', 2720, 40)
+          this.addData('白萝卜', 12000, 20)
+          this.addData('甜瓜', 28000, 10)
+          this.addData('红色马蹄莲', 99000, 20)
+          this.addData('菠萝', 68000, 10)
+          this.addData('紫葡萄', 4920, 30)
+          this.addData('蓝莓', 15000, 40)
+          this.addData('紫薯', 34000, 30)
+          this.addData('粉色绣球', 120000, 10)
+          this.addData('土豆', 83000, 30)
+          this.addData('香菇', 5920, 40)
+          this.addData('胡萝卜', 17000, 20)
+          this.addData('青葡萄', 38000, 30)
+          this.addData('红玫瑰', 146000, 20)
+          this.addData('红洋葱', 91000, 30)
+          this.addData('甜椒', 6000, 30)
+          this.addData('娃娃菜', 18000, 10)
+          this.addData('紫甘蓝', 43000, 10)
+          this.addData('火鹤花', 178000, 20)
+          this.addData('菠菜', 123000, 30)
+          this.addData('青椒', 5880, 30)
+          this.addData('仙人掌', 28000, 20)
+          this.addData('紫茄子', 40000, 20)
+          this.addData('白百合', 216000, 20)
+          this.addData('花生', 149000, 40)
+          this.addData('西蓝花', 7680, 20)
+          this.addData('黄洋葱', 31000, 30)
+          this.addData('芦笋', 72000, 40)
+          this.addData('粉色郁金香', 263000, 20)
+          this.addData('枸杞', 164000, 30)
+          this.addData('韭菜', 7680, 40)
+          this.addData('青茄子', 29000, 20)
+          this.addData('甜菜', 46000, 30)
+          this.addData('黄百合', 192000, 20)
+          this.addData('小母鸡', 9360, 30)
+          this.addData('白猪', 55000, 20)
+          this.addData('湖羊', 80000, 60)
+          this.addData('家羊驼', 69000, 30)
+          this.addData('布丁仓鼠', 202000, 30)
+          this.addData('奶牛', 177000, 50)
+          this.addData('小黄鸭', 12000, 30)
+          this.addData('道奇兔', 75000, 40)
+          this.addData('小青驴', 109000, 20)
+          this.addData('红水豚', 95000, 20)
+          this.addData('红颈鸵鸟', 184000, 10)
+          this.addData('枣栗马', 241000, 40)
+          this.addData('大白鹅', 15000, 50)
+          this.addData('侏儒兔', 82000, 40)
+          this.addData('青羊', 90000, 40)
+          this.addData('丝绒羊驼', 84000, 30)
+          this.addData('红耳廓狐', 403000, 20)
+          this.addData('黄牛', 165000, 50)
+          this.addData('小茶鸭', 11000, 30)
+          this.addData('金棕猪', 70000, 20)
+          this.addData('健蹄驴', 102000, 20)
+          this.addData('白水豚', 88000, 20)
+          this.addData('紫仓鼠', 345000, 30)
+          this.addData('舞步马', 226000, 40)
+          this.addData('雪羽鸡', 16000, 30)
+          this.addData('金吉拉兔', 95000, 40)
+          this.filteredData = this.data
+          this.sortData('harvest')
+          this.sortData('harvest')
+        },
+        methods: {
+          formatNumber(num) {
+            if (num >= 10000) {
+              return (num / 10000).toFixed(2) + '万'
+            }
+            return num.toString()
+          },
+          addData(name, price, count) {
+            const steal = Math.floor(price / 5)
+            const harvest = Math.floor(steal * 1.5)
+            const vipHarvest = Math.floor(steal * 2)
+            const bumperHarvest = Math.floor(steal * 2.5)
+            const vipBumperHarvest = Math.floor(steal * 3)
+            const finalPrice = this.getPrice(price, count)
+            const grade = Math.floor(price / 10000) + 1
+
+            this.data.push({
+              name,
+              price,
+              steal,
+              harvest,
+              vipHarvest,
+              bumperHarvest,
+              vipBumperHarvest,
+              finalPrice,
+              count,
+              grade,
+              status: '',
+            })
+
+            this.updateStatus()
+          },
+          getPrice(price, grade) {
+            const oldPlus = 1 + (grade - 1) * 0.05 + 0.1
+            const newPlus = 1 + (this.grade - 1) * 0.05 + 0.1
+            return Math.floor((price / oldPlus) * newPlus)
+          },
+          sortData(key) {
+            if (this.sortKey === key) {
+              this.sortDesc = !this.sortDesc
+            } else {
+              this.sortKey = key
+              this.sortDesc = false
+            }
+            const multiplier = this.sortDesc ? -1 : 1
+            this.filteredData.sort((a, b) => (a[key] > b[key] ? 1 : -1) * multiplier)
+          },
+          filterData() {
+            const queries = this.queries.filter((query) => query.trim())
+            if (queries.length === 0) {
+              this.filteredData = this.data
+            } else {
+              this.filteredData = this.data.filter((item) => queries.some((query) => item.name.includes(query)))
+            }
+          },
+          addSearchBox() {
+            this.queries.push('')
+          },
+          updateStatus() {
+            this.data.forEach((item) => {
+              if (item.steal >= this.target) {
+                item.status = '任意偷'
+              } else if (item.harvest >= this.target) {
+                item.status = '可偷丰收以上'
+              } else if (item.vipHarvest >= this.target) {
+                item.status = '可偷VIP丰收以上'
+              } else if (item.bumperHarvest >= this.target) {
+                item.status = '可偷大丰收以上'
+              } else if (item.vipBumperHarvest >= this.target) {
+                item.status = '可偷VIP大丰收以上'
+              } else {
+                item.status = '不偷'
+              }
+            })
+          },
+        },
+      })
+    </script>
+  </body>
+</html>

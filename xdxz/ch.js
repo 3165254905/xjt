@@ -671,7 +671,16 @@ function addAllSubProperty() {
 简易木纤地毯1
 瓷茶壶组1
 模型帆船1
-极简手提灯套装1`,
+极简手提灯套装1
+简约吊灯1`,
+  )
+  addSubProperty(
+    data,
+    '家具',
+    '可摆放位置',
+    `窗台
+屋内
+房子左侧花园`,
   )
   addSubProperty(
     data,
@@ -723,14 +732,6 @@ LED线灯条
 粉色绣球
 针叶树
 扇掌棕榈树`,
-  )
-  addSubProperty(
-    data,
-    '家具',
-    '可摆放位置',
-    `窗台
-屋内
-房子左侧花园`,
   )
   addSubProperty(data, '建材', '地板', `地板`)
   addSubProperty(

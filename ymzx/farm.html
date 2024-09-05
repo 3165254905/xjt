@@ -176,11 +176,11 @@
         data: {
           data: [],
           filteredData: [],
-          grade: 65,
+          grade: 72,
           sortKey: '',
           sortDesc: false,
           queries: [''],
-          target: 90000,
+          target: 100000,
         },
         mounted() {
           this.addData('卷心菜', 20, 5)
@@ -235,9 +235,14 @@
           this.addData('葫芦', 190000, 10, 65)
           this.addData('棉花', 10000, 30, 65)
           this.addData('板栗南瓜', 46000, 10, 65)
-          this.addData('荠菜', 83000, 20, 65)
-          this.addData('紫色风信子', 293000, 10, 65)
-          this.addData('芦荟', 116000, 20, 65)
+          this.addData('荠菜', 97000, 20, 72)
+          this.addData('紫色风信子', 462000, 10, 72)
+          this.addData('芦荟', 230000, 20, 72)
+          this.addData('小白菜', 11000, 30, 72)
+          this.addData('西葫芦', 52000, 20, 72)
+          this.addData('竹笋', 74000, 20, 72)
+          this.addData('红色虞美人', 337000, 10, 72)
+          this.addData('宝塔花菜', 234000, 10, 72)
           this.addData('小母鸡', 9360, 30)
           this.addData('白猪', 55000, 20)
           this.addData('湖羊', 80000, 60)
@@ -248,27 +253,31 @@
           this.addData('道奇兔', 75000, 40)
           this.addData('小青驴', 109000, 20)
           this.addData('红水豚', 95000, 20)
-          this.addData('红颈鸵鸟', 184000, 10)
+          this.addData('红颈鸵鸟', 242000, 10, 72)
           this.addData('枣栗马', 241000, 40)
           this.addData('大白鹅', 17000, 50)
           this.addData('侏儒兔', 107000, 40, 63)
-          this.addData('青羊', 137000, 40, 65)
-          this.addData('丝绒羊驼', 125000, 30, 65)
+          this.addData('青羊', 179000, 40, 72)
+          this.addData('丝绒羊驼', 153000, 30, 72)
           this.addData('红耳廓狐', 529000, 20, 63)
-          this.addData('黄牛', 266000, 50, 65)
-          this.addData('小茶鸭', 19000, 30, 65)
-          this.addData('金棕猪', 98000, 20, 65)
-          this.addData('健蹄驴', 102000, 20)
-          this.addData('白水豚', 88000, 20)
-          this.addData('紫仓鼠', 446000, 30, 65)
-          this.addData('舞步马', 226000, 40)
+          this.addData('黄牛', 334000, 50, 72)
+          this.addData('小茶鸭', 24000, 30, 72)
+          this.addData('金棕猪', 133000, 20, 72)
+          this.addData('健蹄驴', 159000, 20, 72)
+          this.addData('白水豚', 116000, 20, 72)
+          this.addData('紫仓鼠', 574000, 30, 72)
+          this.addData('舞步马', 295000, 40, 72)
           this.addData('雪羽鸡', 16000, 30)
           this.addData('金吉拉兔', 95000, 40)
           this.addData('黑鼻羊', 147000, 60, 63)
           this.addData('樱花羊驼', 126000, 30, 63)
-          this.addData('蓝颈鸵鸟', 545000, 10, 63)
+          this.addData('蓝颈鸵鸟', 841000, 10, 72)
           this.addData('草原牛', 331000, 50, 65)
           this.addData('黑羽鸡', 23000, 30, 65)
+          this.addData('墨花猪', 156000, 20, 72)
+          this.addData('黑白羊', 228000, 40, 72)
+          this.addData('森林梅花鹿', 196000, 20, 72)
+          this.addData('金耳廓狐', 766000, 20, 72)
           this.filteredData = this.data
           this.sortData('harvest')
           this.sortData('harvest')
@@ -305,8 +314,8 @@
             this.updateStatus()
           },
           getPrice(price, grade) {
-            const oldPlus = 1 + (grade - 1) * 0.05 + 0.1
-            const newPlus = 1 + (this.grade - 1) * 0.05 + 0.1
+            const oldPlus = 1 + (grade - 1) * 0.05 + (grade < 72 ? 0.1 : 0.2)
+            const newPlus = 1 + (this.grade - 1) * 0.05 + 0.2
             console.log(oldPlus, newPlus)
             return Math.floor((price / oldPlus) * newPlus)
           },

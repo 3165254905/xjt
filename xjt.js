@@ -263,13 +263,13 @@ function render() {
           past: calculateTimeDifferenceAsString(go, time),
         })
       }
-      result.push({
-        type: 'foot',
-        path: `入场`,
-        go: time,
-        arrive: startTime,
-        past: calculateTimeDifferenceAsString(time, startTime),
-      })
+      // result.push({
+      //   type: 'foot',
+      //   path: `入场`,
+      //   go: time,
+      //   arrive: startTime,
+      //   past: calculateTimeDifferenceAsString(time, startTime),
+      // })
       result.push({
         type: 'main',
         path: way[0].name,
